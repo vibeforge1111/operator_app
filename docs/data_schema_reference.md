@@ -1,0 +1,9 @@
+Operator:
+  id
+  wallet
+  name
+  avatar
+  skills
+  xp
+  rank
+  connected_machines

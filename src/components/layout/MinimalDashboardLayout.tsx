@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { CollapsibleSidebar } from './CollapsibleSidebar';
 import { MinimalTopBar } from './MinimalTopBar';
-import { MinimalDashboard } from '../MinimalDashboard';
+import { MVPDashboard } from '../MVPDashboard';
 import OperatorDirectory from '../OperatorDirectory';
 import MachineMarketplace from '../MachineMarketplace';
 import OperationBoard from '../OperationBoard';
@@ -77,7 +77,7 @@ export function MinimalDashboardLayout({
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <MinimalDashboard profile={profile} />;
+        return <MVPDashboard profile={profile} />;
       case 'operators':
         return <OperatorDirectory onBack={() => setCurrentView('dashboard')} />;
       case 'machines':
@@ -85,7 +85,7 @@ export function MinimalDashboardLayout({
       case 'operations':
         return <OperationBoard profile={profile} onBack={() => setCurrentView('dashboard')} onCompleteOperation={() => {}} />;
       default:
-        return <MinimalDashboard profile={profile} />;
+        return <MVPDashboard profile={profile} />;
     }
   };
 

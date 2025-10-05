@@ -30,11 +30,11 @@ export function ModernDashboard({ profile }: ModernDashboardProps) {
   ]);
 
   const [activeMachines] = useState([
-    { id: 1, name: 'Validator Machine Pro', owner: '@quantum', runs: 2156, success: 99.8, status: 'running' },
-    { id: 2, name: 'LaunchOps Engine', owner: '@nova', runs: 1243, success: 98.2, status: 'idle' },
-    { id: 3, name: 'DeFi Farm Machine', owner: '@atlas', runs: 987, success: 96.8, status: 'running' },
-    { id: 4, name: 'Content Synth Machine', owner: '@cipher', runs: 756, success: 99.1, status: 'running' },
-    { id: 5, name: 'Analytics Processor', owner: '@quantum', runs: 654, success: 94.5, status: 'idle' },
+    { id: 1, name: 'Validator Machine Pro', owner: '@quantum', status: 'running' },
+    { id: 2, name: 'LaunchOps Engine', owner: '@nova', status: 'idle' },
+    { id: 3, name: 'DeFi Farm Machine', owner: '@atlas', status: 'running' },
+    { id: 4, name: 'Content Synth Machine', owner: '@cipher', status: 'running' },
+    { id: 5, name: 'Analytics Processor', owner: '@quantum', status: 'idle' },
   ]);
 
   const metrics = [
@@ -153,10 +153,6 @@ export function ModernDashboard({ profile }: ModernDashboardProps) {
                         </div>
                         <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)] mt-1">
                           <span className="font-medium text-[var(--color-primary)]">{machine.owner}</span>
-                          <span>•</span>
-                          <span><AnimatedCounter value={machine.runs} /> runs</span>
-                          <span>•</span>
-                          <span className="text-green-400">{machine.success}%</span>
                         </div>
                       </div>
                     </div>
@@ -188,8 +184,8 @@ export function ModernDashboard({ profile }: ModernDashboardProps) {
 
                 <div>
                   <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-[var(--color-text-muted)]">Active Deployments</span>
-                    <span className="font-medium text-white"><AnimatedCounter value={234} /></span>
+                    <span className="text-[var(--color-text-muted)]">Active Ops</span>
+                    <span className="font-medium text-white"><AnimatedCounter value={15} /></span>
                   </div>
                   <div className="w-full bg-[var(--color-surface)] rounded-full h-2">
                     <div className="bg-blue-500 h-2 rounded-full transition-all duration-1000" style={{ width: '68%' }}></div>
@@ -198,11 +194,11 @@ export function ModernDashboard({ profile }: ModernDashboardProps) {
 
                 <div>
                   <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-[var(--color-text-muted)]">Network Capacity</span>
-                    <span className="font-medium text-white">82%</span>
+                    <span className="text-[var(--color-text-muted)]">Network Health</span>
+                    <span className="font-medium text-white">98%</span>
                   </div>
                   <div className="w-full bg-[var(--color-surface)] rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full transition-all duration-1000" style={{ width: '82%' }}></div>
+                    <div className="bg-purple-500 h-2 rounded-full transition-all duration-1000" style={{ width: '98%' }}></div>
                   </div>
                 </div>
 
@@ -214,8 +210,8 @@ export function ModernDashboard({ profile }: ModernDashboardProps) {
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-[var(--color-text-muted)]">Runs</span>
-                        <span className="font-medium text-white"><AnimatedCounter value={1849} /></span>
+                        <span className="text-[var(--color-text-muted)]">Ops Completed</span>
+                        <span className="font-medium text-white"><AnimatedCounter value={24} /></span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)]">XP Earned</span>

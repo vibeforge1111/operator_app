@@ -1,7 +1,7 @@
 /**
- * Minimal Dashboard Component
+ * MVP Dashboard Component
  *
- * Clean, minimal black & white dashboard with cards and metrics
+ * Operator Network MVP dashboard following ui_wireframes_notes.md specification
  */
 
 import React, { useState } from 'react';
@@ -13,52 +13,95 @@ interface MinimalDashboardProps {
 }
 
 export function MinimalDashboard({ profile }: MinimalDashboardProps) {
-  const [metrics] = useState({
-    activeOperators: 4,
-    machinesRunning: 4,
-    totalContributions: 7073,
-    communityXP: 30000,
+  // MVP Stat Cards Data (following canonical schema)
+  const [operatorStats] = useState({
+    activeOps: 2,
+    openOpsAvailable: 15,
+    machinesConnected: 3,
+    xp: profile.xp,
+    rank: profile.rank,
   });
 
+  // Live Activity (for current component)
   const [liveActivity] = useState([
-    { user: '@atlas', action: 'earned 111 XP', time: 'just now', avatar: 'A' },
-    { user: '@nova', action: 'contributed to Content Synth Machine', time: 'just now', avatar: 'N' },
-    { user: '@cipher', action: 'contributed to Data Pipeline X1', time: 'just now', avatar: 'C' },
-    { user: '@quantum', action: 'earned 107 XP', time: 'just now', avatar: 'Q' },
-    { user: '@nova', action: 'optimized DeFi Farm Machine', time: 'just now', avatar: 'N' },
+    { user: 'alex_mars', avatar: 'A', action: 'completed Op in Mars Game', time: '2m ago' },
+    { user: 'sam_ai', avatar: 'S', action: 'joined AI Content Generator', time: '5m ago' },
+    { user: 'maya_code', avatar: 'M', action: 'claimed new Op', time: '8m ago' },
+    { user: 'dev_ops', avatar: 'D', action: 'deployed to Analytics', time: '12m ago' },
+    { user: 'jane_ui', avatar: 'J', action: 'started UI enhancement', time: '15m ago' },
   ]);
 
+  // Recent Activity (MVP format)
+  const [recentActivity] = useState([
+    { action: 'Verified Op: API Integration in Mars Survival Game', reward: '+50 XP', time: '2 hours ago' },
+    { action: 'Joined Machine: AI Content Generator as Contributor', reward: '', time: '1 day ago' },
+    { action: 'Claimed Op: UI Enhancement in Design Studio', reward: '', time: '2 days ago' },
+    { action: 'Completed Op: Bug Fix in LaunchOps Engine', reward: '+75 XP', time: '3 days ago' },
+    { action: 'Connected Machine: Analytics Dashboard', reward: '', time: '5 days ago' },
+  ]);
+
+  // Active Machines (for current component - MVP compliant)
   const [activeMachines] = useState([
-    { id: 1, name: 'Validator Machine Pro', owner: '@quantum', runs: 2156, success: 99.8, status: 'running' },
-    { id: 2, name: 'LaunchOps Engine', owner: '@nova', runs: 1243, success: 98.2, status: 'idle' },
-    { id: 3, name: 'DeFi Farm Machine', owner: '@atlas', runs: 987, success: 96.8, status: 'running' },
-    { id: 4, name: 'Content Synth Machine', owner: '@cipher', runs: 756, success: 99.1, status: 'running' },
-    { id: 5, name: 'Analytics Processor', owner: '@quantum', runs: 654, success: 94.5, status: 'idle' },
+    { id: 1, name: 'Mars Survival Game', owner: 'GameDev Team', status: 'running' },
+    { id: 2, name: 'AI Content Generator', owner: 'AI Labs', status: 'running' },
+    { id: 3, name: 'Analytics Dashboard', owner: 'Data Team', status: 'running' },
+    { id: 4, name: 'Design Studio', owner: 'UX Team', status: 'running' },
   ]);
 
+  // Your Machines (MVP format with correct badges)
+  const [yourMachines] = useState([
+    {
+      id: 1,
+      name: 'Mars Survival Game',
+      category: 'GameOps',
+      role: 'Contributor',
+      openOps: 3,
+      activeOps: 1,
+      contributors: 2,
+      completed7d: 5
+    },
+    {
+      id: 2,
+      name: 'AI Content Generator',
+      category: 'Tooling',
+      role: 'Maintainer',
+      openOps: 2,
+      activeOps: 2,
+      contributors: 1,
+      completed7d: 8
+    },
+    {
+      id: 3,
+      name: 'Analytics Dashboard',
+      category: 'Other',
+      role: 'Owner',
+      openOps: 5,
+      activeOps: 0,
+      contributors: 0,
+      completed7d: 0
+    },
+  ]);
+
+  // MVP Stat Cards (canonical labels)
   const metricCards = [
     {
-      title: 'Active Operators',
-      value: metrics.activeOperators,
-      change: '+12.5%',
+      title: 'Active Ops',
+      value: operatorStats.activeOps,
       color: 'text-[var(--foreground)]',
     },
     {
-      title: 'Machines Running',
-      value: metrics.machinesRunning,
-      change: '+8.2%',
+      title: 'Open Ops Available',
+      value: operatorStats.openOpsAvailable,
       color: 'text-[var(--muted-foreground)]',
     },
     {
-      title: 'Total Contributions',
-      value: metrics.totalContributions,
-      change: '+24.1%',
+      title: 'Machines Connected',
+      value: operatorStats.machinesConnected,
       color: 'text-[var(--foreground)]',
     },
     {
-      title: 'Community XP',
-      value: `${Math.floor(metrics.communityXP / 1000)}K`,
-      change: '+15.7%',
+      title: 'XP / Rank',
+      value: `${operatorStats.xp} XP · ${operatorStats.rank}`,
       color: 'text-[var(--muted-foreground)]',
     },
   ];
@@ -150,10 +193,6 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
                         </div>
                         <div className="flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
                           <span className="font-medium text-[var(--foreground)]">{machine.owner}</span>
-                          <span>•</span>
-                          <span><AnimatedCounter value={machine.runs} /> runs</span>
-                          <span>•</span>
-                          <span className="text-[var(--foreground)]">{machine.success}%</span>
                         </div>
                       </div>
                     </div>
@@ -185,11 +224,11 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
                   </div>
                 </div>
 
-                {/* Active Deployments */}
+                {/* Active Ops */}
                 <div>
                   <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-[var(--muted-foreground)]">Active Deployments</span>
-                    <span className="font-medium text-[var(--foreground)]"><AnimatedCounter value={234} /></span>
+                    <span className="text-[var(--muted-foreground)]">Active Ops</span>
+                    <span className="font-medium text-[var(--foreground)]"><AnimatedCounter value={15} /></span>
                   </div>
                   <div className="progress-bar">
                     <div className="progress-fill animate-progress-fill" style={{ width: '68%' }}></div>
@@ -216,8 +255,8 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-[var(--muted-foreground)]">Runs</span>
-                        <span className="font-medium text-[var(--foreground)]"><AnimatedCounter value={1849} /></span>
+                        <span className="text-[var(--muted-foreground)]">Ops Completed</span>
+                        <span className="font-medium text-[var(--foreground)]"><AnimatedCounter value={24} /></span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--muted-foreground)]">XP Earned</span>

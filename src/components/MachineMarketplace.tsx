@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Machine, MachineCategory } from '../types/machine';
-import { MOCK_MACHINES } from '../data/mockMachines';
-import { MOCK_OPERATORS } from '../data/mockOperators';
+import { getMachines, connectOperatorToMachine } from '../lib/firebase/machines';
+import { getOperators } from '../lib/firebase/operators';
 
 /**
  * Props for the MachineMarketplace component
@@ -55,28 +55,50 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
   const [isLoading, setIsLoading] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectingToMachine, setConnectingToMachine] = useState<string | null>(null);
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [operators, setOperators] = useState<{ [id: string]: string }>({});
 
-  // Simulate initial loading
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Load machines and operators from Firebase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setConnectionError(null);
 
-  const filteredMachines = useMemo(() => {
-    return MOCK_MACHINES.filter(machine => {
-      const matchesSearch = machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           machine.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           machine.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        // Load machines and operators in parallel
+        const [machinesResult, operatorsResult] = await Promise.all([
+          getMachines({
+            categoryFilter: selectedCategory === 'all' ? undefined : selectedCategory,
+            statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+            availableOnly: showAvailableOnly,
+            searchQuery: searchQuery || undefined,
+            sortBy: 'newest',
+            limitCount: 50
+          }),
+          getOperators({ limitCount: 200 })
+        ]);
 
-      const matchesCategory = selectedCategory === 'all' || machine.category === selectedCategory;
-      const matchesStatus = selectedStatus === 'all' || machine.status === selectedStatus;
-      const hasSlots = !showAvailableOnly || machine.operators.length < machine.maxOperators;
+        setMachines(machinesResult.machines);
 
-      return matchesSearch && matchesCategory && matchesStatus && hasSlots;
-    });
-  }, [searchQuery, selectedCategory, selectedStatus, showAvailableOnly]);
+        // Create operator ID to handle mapping
+        const operatorMap: { [id: string]: string } = {};
+        operatorsResult.operators.forEach(op => {
+          operatorMap[op.id] = op.handle;
+        });
+        setOperators(operatorMap);
+
+        setIsLoading(false);
+      } catch (error) {
+        setConnectionError(error instanceof Error ? error.message : 'Failed to load marketplace data');
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [selectedCategory, selectedStatus, showAvailableOnly, searchQuery]);
+
+  // Firebase already handles filtering
+  const filteredMachines = machines;
 
   /**
    * Handles machine connection with error handling and loading states
@@ -88,17 +110,21 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
     setConnectionError(null);
 
     try {
-      // Simulate connection delay and potential failure
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // 10% chance of connection failure for demo
-          if (Math.random() < 0.1) {
-            reject(new Error('Connection failed: Machine temporarily unavailable'));
-          } else {
-            resolve(undefined);
-          }
-        }, 2000);
+      // TODO: Get actual operator ID from context/auth
+      const demoOperatorId = 'demo-operator-id';
+
+      await connectOperatorToMachine(machineId, demoOperatorId);
+
+      // Refresh machines to show updated connection
+      const machinesResult = await getMachines({
+        categoryFilter: selectedCategory === 'all' ? undefined : selectedCategory,
+        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+        availableOnly: showAvailableOnly,
+        searchQuery: searchQuery || undefined,
+        sortBy: 'newest',
+        limitCount: 50
       });
+      setMachines(machinesResult.machines);
 
       onConnectToMachine(machineId);
     } catch (error) {
@@ -115,10 +141,7 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
    * @returns {string[]} Array of operator handles or 'Unknown' for missing operators
    */
   const getOperatorNames = (operatorIds: string[]) => {
-    return operatorIds.map(id => {
-      const operator = MOCK_OPERATORS.find(op => op.id === id);
-      return operator?.handle || 'Unknown';
-    });
+    return operatorIds.map(id => operators[id] || 'Unknown');
   };
 
   /**

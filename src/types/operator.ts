@@ -60,15 +60,15 @@ export const SKILL_DESCRIPTIONS = {
  * Operator rank progression system
  *
  * Defines the hierarchy of operator ranks based on XP thresholds.
- * This will be used for gamification and reputation display.
+ * This follows the canonical schema from data_schema_reference.md
  *
  * @constant
  */
 export const RANK_THRESHOLDS = {
   Apprentice: 0,
-  Journeyman: 1000,
-  Expert: 5000,
-  Master: 15000
+  Operator: 100,
+  Senior: 300,
+  Architect: 800
 } as const;
 
 export type OperatorRank = keyof typeof RANK_THRESHOLDS;
@@ -88,9 +88,9 @@ export type OperatorRank = keyof typeof RANK_THRESHOLDS;
  * calculateRank(10000) // 'Expert'
  */
 export function calculateRank(xp: number): OperatorRank {
-  if (xp >= RANK_THRESHOLDS.Master) return 'Master';
-  if (xp >= RANK_THRESHOLDS.Expert) return 'Expert';
-  if (xp >= RANK_THRESHOLDS.Journeyman) return 'Journeyman';
+  if (xp >= RANK_THRESHOLDS.Architect) return 'Architect';
+  if (xp >= RANK_THRESHOLDS.Senior) return 'Senior';
+  if (xp >= RANK_THRESHOLDS.Operator) return 'Operator';
   return 'Apprentice';
 }
 

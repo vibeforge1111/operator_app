@@ -18,7 +18,7 @@
  * @returns {JSX.Element} The operation board interface
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Operation,
   OperationCategory,
@@ -31,7 +31,7 @@ import {
   sortOperationsByPriority,
   filterOperationsBySkills
 } from '../types/operation';
-import { MOCK_OPERATIONS, getAvailableOperations } from '../data/mockOperations';
+import { getOperations, claimOperation, startOperation, submitOperation } from '../lib/firebase/operations';
 import { OperatorProfile } from '../types/operator';
 import { useXPSystem } from '../hooks/useXPSystem';
 import { useOperatorProfile } from '../hooks/useOperatorProfile';
@@ -70,65 +70,68 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<OperationCategory | 'all'>('all');
   const [selectedPriority, setSelectedPriority] = useState<OperationPriority | 'all'>('all');
-  const [selectedStatus, setSelectedStatus] = useState<OperationStatus | 'all'>('Open');
+  const [selectedStatus, setSelectedStatus] = useState<OperationStatus | 'all'>('open');
   const [showRecommended, setShowRecommended] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [acceptingOperation, setAcceptingOperation] = useState<string | null>(null);
   const [completingOperation, setCompletingOperation] = useState<string | null>(null);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [lastReward, setLastReward] = useState<any>(null);
+  const [operations, setOperations] = useState<Operation[]>([]);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   // XP System integration
   const { calculateXPReward, awardXP, isAwarding } = useXPSystem();
   const { updateProfile } = useOperatorProfile(profile.walletAddress);
 
-  // Simulate initial loading
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  // Load operations from Firebase
+  useEffect(() => {
+    const loadOperations = async () => {
+      try {
+        setIsLoading(true);
+        setLoadingError(null);
+
+        const result = await getOperations({
+          statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+          searchQuery: searchQuery || undefined,
+          sortBy: 'newest',
+          limitCount: 50
+        });
+
+        setOperations(result.operations);
+        setIsLoading(false);
+      } catch (error) {
+        setLoadingError(error instanceof Error ? error.message : 'Failed to load operations');
+        setIsLoading(false);
+      }
+    };
+
+    loadOperations();
+  }, [selectedStatus, searchQuery]);
 
   /**
    * Filters and sorts operations based on current criteria
    */
   const filteredOperations = useMemo(() => {
-    let operations = [...MOCK_OPERATIONS];
+    let filteredOps = [...operations];
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      operations = operations.filter(op =>
-        op.title.toLowerCase().includes(query) ||
-        op.description.toLowerCase().includes(query) ||
-        op.tags.some(tag => tag.toLowerCase().includes(query))
-      );
-    }
-
-    // Filter by category
+    // Client-side filtering for criteria not handled by Firebase
     if (selectedCategory !== 'all') {
-      operations = operations.filter(op => op.category === selectedCategory);
+      filteredOps = filteredOps.filter(op => op.category === selectedCategory);
     }
 
-    // Filter by priority
     if (selectedPriority !== 'all') {
-      operations = operations.filter(op => op.priority === selectedPriority);
-    }
-
-    // Filter by status
-    if (selectedStatus !== 'all') {
-      operations = operations.filter(op => op.status === selectedStatus);
+      filteredOps = filteredOps.filter(op => op.priority === selectedPriority);
     }
 
     // Filter by recommended (matching operator skills)
     if (showRecommended) {
-      operations = filterOperationsBySkills(operations, profile.skills);
+      filteredOps = filterOperationsBySkills(filteredOps, profile.skills);
     }
 
     // Sort by priority and deadline
-    return sortOperationsByPriority(operations);
-  }, [searchQuery, selectedCategory, selectedPriority, selectedStatus, showRecommended, profile.skills]);
+    return sortOperationsByPriority(filteredOps);
+  }, [operations, selectedCategory, selectedPriority, showRecommended, profile.skills]);
 
   /**
    * Handles operation acceptance with loading state
@@ -139,13 +142,22 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
     setAcceptingOperation(operationId);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // In production, this would update the operation status to 'InProgress'
-      // and assign it to the current operator
+      // Claim the operation
+      await claimOperation(operationId, profile.id);
+
+      // Reload operations to show updated status
+      const result = await getOperations({
+        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+        searchQuery: searchQuery || undefined,
+        sortBy: 'newest',
+        limitCount: 50
+      });
+      setOperations(result.operations);
+
       console.log(`Operation ${operationId} accepted by ${profile.handle}`);
     } catch (error) {
       console.error('Failed to accept operation:', error);
+      setLoadingError(error instanceof Error ? error.message : 'Failed to accept operation');
     } finally {
       setAcceptingOperation(null);
     }
@@ -157,17 +169,29 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
    * @param {string} operationId - The ID of the operation to complete
    */
   const handleCompleteOperation = async (operationId: string) => {
-    const operation = MOCK_OPERATIONS.find(op => op.id === operationId);
+    const operation = operations.find(op => op.id === operationId);
     if (!operation) return;
 
     setCompletingOperation(operationId);
 
     try {
+      // Submit operation for verification
+      await submitOperation(operationId, profile.id);
+
       // Award XP and tokens
       const reward = await awardXP(profile, operation, updateProfile);
 
       setLastReward(reward);
       setShowRewardModal(true);
+
+      // Reload operations to show updated status
+      const result = await getOperations({
+        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+        searchQuery: searchQuery || undefined,
+        sortBy: 'newest',
+        limitCount: 50
+      });
+      setOperations(result.operations);
 
       // Call parent callback
       onCompleteOperation(operationId);
@@ -176,6 +200,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
 
     } catch (error) {
       console.error('Failed to complete operation:', error);
+      setLoadingError(error instanceof Error ? error.message : 'Failed to complete operation');
     } finally {
       setCompletingOperation(null);
     }
@@ -252,24 +277,26 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="operator-card rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-primary)]">{getAvailableOperations().length}</div>
+            <div className="text-2xl font-bold text-[var(--color-primary)]">
+              {operations.filter(op => op.status === 'open').length}
+            </div>
             <div className="text-sm text-[var(--color-text-muted)]">Open Operations</div>
           </div>
           <div className="operator-card rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-[var(--color-primary)]">
-              {filterOperationsBySkills(getAvailableOperations(), profile.skills).length}
+              {filterOperationsBySkills(operations.filter(op => op.status === 'open'), profile.skills).length}
             </div>
             <div className="text-sm text-[var(--color-text-muted)]">Recommended</div>
           </div>
           <div className="operator-card rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-[var(--color-primary)]">
-              {MOCK_OPERATIONS.filter(op => op.assignedOperatorId === profile.id).length}
+              {operations.filter(op => op.assigneeId === profile.id).length}
             </div>
             <div className="text-sm text-[var(--color-text-muted)]">Your Operations</div>
           </div>
           <div className="operator-card rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-[var(--color-primary)]">
-              {MOCK_OPERATIONS.filter(op => op.priority === 'Critical').length}
+              {operations.filter(op => op.priority === 'Critical').length}
             </div>
             <div className="text-sm text-[var(--color-text-muted)]">Critical Priority</div>
           </div>
@@ -370,7 +397,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
                 setSearchQuery('');
                 setSelectedCategory('all');
                 setSelectedPriority('all');
-                setSelectedStatus('Open');
+                setSelectedStatus('open');
                 setShowRecommended(false);
               }}
               className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
@@ -486,7 +513,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
                   <button className="flex-1 py-2 bg-[var(--color-surface)] text-white border border-[var(--color-primary)]/30 rounded hover:border-[var(--color-primary)]/50 transition-colors text-sm">
                     View Details
                   </button>
-                  {operation.status === 'Open' && (
+                  {operation.status === 'open' && (
                     <button
                       onClick={() => handleAcceptOperation(operation.id)}
                       disabled={acceptingOperation === operation.id}

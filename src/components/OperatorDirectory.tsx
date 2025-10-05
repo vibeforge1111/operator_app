@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { OperatorProfile, SKILL_TAGS, SkillTag } from '../types/operator';
-import { MOCK_OPERATORS } from '../data/mockOperators';
+import React, { useState, useMemo, useEffect } from 'react';
+import { OperatorProfile, SKILL_TAGS, SkillTag, OperatorRank } from '../types/operator';
+import { getOperators } from '../lib/firebase/operators';
 
 /**
  * Props for the OperatorDirectory component
@@ -39,51 +39,50 @@ interface OperatorDirectoryProps {
  */
 export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<SkillTag | 'all'>('all');
+  const [selectedRank, setSelectedRank] = useState<OperatorRank | 'all'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'alphabetical' | 'xp'>('newest');
   const [isLoading, setIsLoading] = useState(true);
   const [networkError, setNetworkError] = useState<string | null>(null);
+  const [operators, setOperators] = useState<OperatorProfile[]>([]);
 
-  // Simulate initial loading
+  // Debounce search query
   React.useEffect(() => {
     const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load operators from Firebase
+  useEffect(() => {
+    const loadOperators = async () => {
       try {
-        // Simulate potential network error (5% chance)
-        if (Math.random() < 0.05) {
-          throw new Error('Failed to load operator directory');
-        }
+        setIsLoading(true);
+        setNetworkError(null);
+
+        const result = await getOperators({
+          skillFilter: selectedSkill === 'all' ? undefined : selectedSkill,
+          rankFilter: selectedRank === 'all' ? undefined : selectedRank,
+          searchQuery: debouncedSearchQuery || undefined,
+          sortBy,
+          limitCount: 50
+        });
+
+        setOperators(result.operators);
         setIsLoading(false);
       } catch (error) {
-        setNetworkError(error instanceof Error ? error.message : 'Loading failed');
+        setNetworkError(error instanceof Error ? error.message : 'Failed to load operators');
         setIsLoading(false);
       }
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+    };
 
-  const filteredOperators = useMemo(() => {
-    let filtered = MOCK_OPERATORS.filter(op => {
-      const matchesSearch = op.handle.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSkill = selectedSkill === 'all' || op.skills.includes(selectedSkill);
-      return matchesSearch && matchesSkill;
-    });
+    loadOperators();
+  }, [selectedSkill, selectedRank, debouncedSearchQuery, sortBy]);
 
-    // Sort operators
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'alphabetical':
-          return a.handle.localeCompare(b.handle);
-        case 'xp':
-          return b.xp - a.xp;
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [searchQuery, selectedSkill, sortBy]);
+  // Firebase already handles filtering and sorting
+  const filteredOperators = operators;
 
   // Show loading state
   if (isLoading) {
@@ -107,10 +106,23 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           <div className="text-white">Failed to Load Directory</div>
           <div className="text-sm text-red-400">{networkError}</div>
           <button
-            onClick={() => {
-              setNetworkError(null);
-              setIsLoading(true);
-              setTimeout(() => setIsLoading(false), 1000);
+            onClick={async () => {
+              try {
+                setNetworkError(null);
+                setIsLoading(true);
+                const result = await getOperators({
+                  skillFilter: selectedSkill === 'all' ? undefined : selectedSkill,
+                  rankFilter: selectedRank === 'all' ? undefined : selectedRank,
+                  searchQuery: debouncedSearchQuery || undefined,
+                  sortBy,
+                  limitCount: 50
+                });
+                setOperators(result.operators);
+                setIsLoading(false);
+              } catch (error) {
+                setNetworkError(error instanceof Error ? error.message : 'Failed to load operators');
+                setIsLoading(false);
+              }
             }}
             className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
           >
@@ -142,7 +154,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Search and Filters */}
         <div className="operator-card rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-white">Search Operators</label>
@@ -167,6 +179,22 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
                 {SKILL_TAGS.map(skill => (
                   <option key={skill} value={skill}>{skill}</option>
                 ))}
+              </select>
+            </div>
+
+            {/* Rank Filter */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-white">Filter by Rank</label>
+              <select
+                value={selectedRank}
+                onChange={(e) => setSelectedRank(e.target.value as OperatorRank | 'all')}
+                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+              >
+                <option value="all">All Ranks</option>
+                <option value="Apprentice">Apprentice</option>
+                <option value="Operator">Operator</option>
+                <option value="Senior">Senior</option>
+                <option value="Architect">Architect</option>
               </select>
             </div>
 
@@ -199,6 +227,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
               onClick={() => {
                 setSearchQuery('');
                 setSelectedSkill('all');
+                setSelectedRank('all');
               }}
               className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
             >
@@ -257,7 +286,9 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
 
                 {/* Last Active */}
                 <div className="text-xs text-[var(--color-text-muted)]">
-                  Last active: {operator.lastActive.toLocaleDateString()}
+                  Last active: {operator.lastActive instanceof Date
+                    ? operator.lastActive.toLocaleDateString()
+                    : new Date(operator.lastActive).toLocaleDateString()}
                 </div>
               </div>
             ))}

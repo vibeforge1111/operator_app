@@ -89,7 +89,7 @@ export const OperatorProfileSchema = z.object({
   handle: HandleSchema,
   skills: z.array(SkillTagSchema).min(1).max(5),
   xp: z.number().int().min(0).max(1000000),
-  rank: z.enum(['Apprentice', 'Journeyman', 'Expert', 'Master']),
+  rank: z.enum(['Apprentice', 'Operator', 'Senior', 'Architect']),
   connectedMachines: z.number().int().min(0),
   activeOps: z.number().int().min(0),
   bio: z.string().max(500).optional(),
@@ -217,7 +217,7 @@ export const OperatorSearchSchema = z.object({
   skills: z.array(SkillTagSchema).optional(),
   minXp: z.number().int().min(0).optional(),
   maxXp: z.number().int().min(0).optional(),
-  rank: z.array(z.enum(['Apprentice', 'Journeyman', 'Expert', 'Master'])).optional(),
+  rank: z.array(z.enum(['Apprentice', 'Operator', 'Senior', 'Architect'])).optional(),
   limit: z.number().int().min(1).max(100).default(20),
   offset: z.number().int().min(0).default(0)
 });

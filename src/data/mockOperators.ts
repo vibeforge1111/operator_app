@@ -1,4 +1,4 @@
-import { OperatorProfile } from '../types/operator';
+import { OperatorProfile, calculateRank } from '../types/operator';
 
 export const MOCK_OPERATORS: OperatorProfile[] = [
   {
@@ -7,7 +7,7 @@ export const MOCK_OPERATORS: OperatorProfile[] = [
     handle: 'alice_dev',
     skills: ['Dev', 'Coordination'],
     xp: 1250,
-    rank: 'Journeyman',
+    rank: calculateRank(1250), // Architect
     connectedMachines: 3,
     activeOps: 2,
     createdAt: new Date('2024-01-15'),
@@ -19,8 +19,8 @@ export const MOCK_OPERATORS: OperatorProfile[] = [
     walletAddress: '7MnD2k8pXqRR5HwrLpOz3nY8N9tQ1JkM4vS9eP3kJ5h9Rs',
     handle: 'bob_design',
     skills: ['Design', 'VibeOps'],
-    xp: 890,
-    rank: 'Apprentice',
+    xp: 250,
+    rank: calculateRank(250), // Operator
     connectedMachines: 1,
     activeOps: 1,
     createdAt: new Date('2024-02-20'),
@@ -32,8 +32,8 @@ export const MOCK_OPERATORS: OperatorProfile[] = [
     walletAddress: '9QrF4m2tYzZZ8HwrSpPy5oY9P1tR2MkN6xT0gR4lK7i0Uv',
     handle: 'carol_ops',
     skills: ['BizOps', 'Narrative', 'Coordination'],
-    xp: 2100,
-    rank: 'Expert',
+    xp: 950,
+    rank: calculateRank(950), // Architect
     connectedMachines: 5,
     activeOps: 4,
     createdAt: new Date('2023-11-10'),
@@ -45,8 +45,8 @@ export const MOCK_OPERATORS: OperatorProfile[] = [
     walletAddress: '3EsG7p4vXwWW9JwrTqRx6pZ0R2tS3NlO8yU1hS5mL9j2Wx',
     handle: 'dave_fullstack',
     skills: ['Dev', 'Design', 'BizOps'],
-    xp: 1680,
-    rank: 'Journeyman',
+    xp: 450,
+    rank: calculateRank(450), // Senior
     connectedMachines: 2,
     activeOps: 3,
     createdAt: new Date('2024-01-05'),
@@ -57,11 +57,11 @@ export const MOCK_OPERATORS: OperatorProfile[] = [
     id: 'op_demo',
     walletAddress: '5KxW8f2vYQQQGHwrQoXX2mY7N8tP9JkL3vR8dN2jH4g8Qp',
     handle: 'demo_operator',
-    skills: ['Dev', 'Coordination'],
-    xp: 750,
-    rank: 'Journeyman',
-    connectedMachines: 2,
-    activeOps: 1,
+    skills: ['Dev', 'Design', 'VibeOps'],
+    xp: 2750,
+    rank: calculateRank(2750), // Architect
+    connectedMachines: 3,
+    activeOps: 2,
     createdAt: new Date('2024-10-01'),
     updatedAt: new Date('2024-10-05'),
     lastActive: new Date(),

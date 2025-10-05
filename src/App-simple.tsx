@@ -3,6 +3,8 @@ import OperatorDashboard from './components/OperatorDashboard';
 import OperatorDirectory from './components/OperatorDirectory';
 import MachineMarketplace from './components/MachineMarketplace';
 import OperationBoard from './components/OperationBoard';
+import WalletConnection from './components/WalletConnection';
+import { WalletContextProvider } from './contexts/WalletContext';
 import { useOperatorProfile } from './hooks/useOperatorProfile';
 
 /**
@@ -33,22 +35,27 @@ import { useOperatorProfile } from './hooks/useOperatorProfile';
  * <App />
  * ```
  */
-function App() {
+function AppContent() {
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'directory' | 'machines' | 'operations'>('home');
-  const [isConnected, setIsConnected] = useState(false);
-  const [mockWallet] = useState('5KxW...g8Qp'); // Mock wallet for demo
-  const { profile } = useOperatorProfile(isConnected ? mockWallet : undefined);
+  const [connectedWallet, setConnectedWallet] = useState<string | undefined>(undefined);
+  const { profile } = useOperatorProfile(connectedWallet);
 
   /**
-   * Handles wallet connection for demo purposes
+   * Handles wallet connection
    *
-   * Simulates wallet connection and transitions to the dashboard view.
-   * In production, this would integrate with actual Solana wallet adapters.
+   * Processes successful wallet connection and transitions to the dashboard view.
+   * Integrates with actual Solana wallet adapters.
    */
-  const handleConnect = () => {
-    setIsConnected(true);
-    setCurrentView('dashboard');
+  const handleWalletConnected = (walletAddress: string) => {
+    setConnectedWallet(walletAddress);
   };
+
+  // Auto-navigate to dashboard when both wallet is connected and profile exists
+  React.useEffect(() => {
+    if (connectedWallet && profile && currentView === 'home') {
+      setCurrentView('dashboard');
+    }
+  }, [connectedWallet, profile, currentView]);
 
   /**
    * Handles machine connection requests
@@ -67,19 +74,17 @@ function App() {
   };
 
   /**
-   * Handles operation acceptance requests
+   * Handles operation completion with XP and token rewards
    *
-   * Processes operator acceptance of operations and updates their profile.
-   * In production, this would update the backend and award XP/tokens.
+   * Processes operator completion of operations, awards XP/tokens,
+   * and updates their profile with new rank progression.
    *
-   * @param {string} operationId - The ID of the operation to accept
+   * @param {string} operationId - The ID of the operation to complete
    */
-  const handleAcceptOperation = (operationId: string) => {
-    // In production, this would update the backend and operator profile
-    console.log(`Accepting operation: ${operationId}`);
-    // Show success message and redirect to dashboard
-    alert(`Successfully accepted operation! Check your dashboard for updates.`);
-    setCurrentView('dashboard');
+  const handleCompleteOperation = (operationId: string) => {
+    // This will be handled by the OperationBoard component
+    // with full XP calculation and reward distribution
+    console.log(`Completing operation: ${operationId}`);
   };
 
   if (currentView === 'directory') {
@@ -100,7 +105,7 @@ function App() {
       <OperationBoard
         profile={profile}
         onBack={() => setCurrentView('dashboard')}
-        onAcceptOperation={handleAcceptOperation}
+        onCompleteOperation={handleCompleteOperation}
       />
     );
   }
@@ -118,34 +123,32 @@ function App() {
 
   return (
     <div className="min-h-screen terminal-bg flex items-center justify-center">
-      <div className="text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
+      <div className="max-w-md mx-auto px-6 py-8 space-y-8">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
             OPERATOR NETWORK
           </h1>
-          <p className="text-xl text-[var(--color-text-muted)] max-w-2xl mx-auto">
+          <p className="text-[var(--color-text-muted)]">
             The foundational identity and discovery layer. Establish presence, showcase capabilities, discover collaborators.
           </p>
         </div>
 
-        <div className="space-y-4">
-          <button
-            onClick={handleConnect}
-            className="px-8 py-4 bg-[var(--color-primary)] text-black font-medium rounded-lg hover:bg-[var(--color-primary)]/80 transition-colors"
-          >
-            {isConnected ? 'Enter Network' : 'Connect Wallet (Demo)'}
-          </button>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Demo mode - exploring the operator network
-          </p>
-        </div>
+        <WalletConnection onConnected={handleWalletConnected} />
 
-        <div className="text-xs text-[var(--color-text-muted)] space-y-1">
+        <div className="text-center text-xs text-[var(--color-text-muted)] space-y-1">
           <div>tick... tick... tick...</div>
           <div className="text-[var(--color-primary)]">Network heartbeat active</div>
         </div>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <WalletContextProvider>
+      <AppContent />
+    </WalletContextProvider>
   );
 }
 

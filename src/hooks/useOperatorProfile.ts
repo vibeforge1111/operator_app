@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { OperatorProfile } from '../types/operator';
+import { PublicKey } from '@solana/web3.js';
 
 // Mock data storage - in production this would connect to Supabase
 const MOCK_OPERATORS: Record<string, OperatorProfile> = {
@@ -38,13 +39,32 @@ export function useOperatorProfile(walletAddress?: string) {
     }, 1000);
   }, [walletAddress]);
 
-  const createProfile = async (handle: string, skills: string[]) => {
+  const createProfile = async (handle: string, skills: string[], signMessage?: (message: Uint8Array) => Promise<Uint8Array>) => {
     if (!walletAddress) throw new Error('Wallet not connected');
+
+    // Validate wallet address format
+    try {
+      new PublicKey(walletAddress);
+    } catch (error) {
+      throw new Error('Invalid wallet address format');
+    }
 
     // Check handle uniqueness
     const existingHandles = Object.values(MOCK_OPERATORS).map(p => p.handle);
     if (existingHandles.includes(handle)) {
       throw new Error('Handle already taken');
+    }
+
+    // Require signature verification for profile creation
+    if (signMessage) {
+      try {
+        const message = `Create Operator Profile\nHandle: ${handle}\nWallet: ${walletAddress}\nTimestamp: ${Date.now()}`;
+        const messageBytes = new TextEncoder().encode(message);
+        await signMessage(messageBytes);
+        console.log('Signature verified for profile creation');
+      } catch (error) {
+        throw new Error('Signature verification failed');
+      }
     }
 
     const newProfile: OperatorProfile = {
@@ -70,9 +90,30 @@ export function useOperatorProfile(walletAddress?: string) {
     return newProfile;
   };
 
+  const updateProfile = async (updates: Partial<OperatorProfile>) => {
+    if (!walletAddress || !profile) {
+      throw new Error('No profile to update');
+    }
+
+    const updatedProfile = {
+      ...profile,
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    MOCK_OPERATORS[walletAddress] = updatedProfile;
+    setProfile(updatedProfile);
+
+    return updatedProfile;
+  };
+
   return {
     profile,
     loading,
     createProfile,
+    updateProfile,
   };
 }

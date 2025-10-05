@@ -33,6 +33,8 @@ import {
 } from '../types/operation';
 import { MOCK_OPERATIONS, getAvailableOperations } from '../data/mockOperations';
 import { OperatorProfile } from '../types/operator';
+import { useXPSystem } from '../hooks/useXPSystem';
+import { useOperatorProfile } from '../hooks/useOperatorProfile';
 
 /**
  * Props for the OperationBoard component
@@ -43,8 +45,8 @@ interface OperationBoardProps {
   profile: OperatorProfile;
   /** Callback to navigate back to the dashboard */
   onBack: () => void;
-  /** Callback when an operator accepts an operation */
-  onAcceptOperation: (operationId: string) => void;
+  /** Callback when an operator completes an operation */
+  onCompleteOperation: (operationId: string) => void;
 }
 
 /**
@@ -64,7 +66,7 @@ const OPERATION_PRIORITIES: OperationPriority[] = ['Low', 'Medium', 'High', 'Cri
  */
 const OPERATION_STATUSES: OperationStatus[] = ['Open', 'InProgress', 'UnderReview', 'Completed', 'Cancelled'];
 
-export default function OperationBoard({ profile, onBack, onAcceptOperation }: OperationBoardProps) {
+export default function OperationBoard({ profile, onBack, onCompleteOperation }: OperationBoardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<OperationCategory | 'all'>('all');
   const [selectedPriority, setSelectedPriority] = useState<OperationPriority | 'all'>('all');
@@ -72,6 +74,13 @@ export default function OperationBoard({ profile, onBack, onAcceptOperation }: O
   const [showRecommended, setShowRecommended] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [acceptingOperation, setAcceptingOperation] = useState<string | null>(null);
+  const [completingOperation, setCompletingOperation] = useState<string | null>(null);
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [lastReward, setLastReward] = useState<any>(null);
+
+  // XP System integration
+  const { calculateXPReward, awardXP, isAwarding } = useXPSystem();
+  const { updateProfile } = useOperatorProfile(profile.walletAddress);
 
   // Simulate initial loading
   React.useEffect(() => {
@@ -132,11 +141,43 @@ export default function OperationBoard({ profile, onBack, onAcceptOperation }: O
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      onAcceptOperation(operationId);
+      // In production, this would update the operation status to 'InProgress'
+      // and assign it to the current operator
+      console.log(`Operation ${operationId} accepted by ${profile.handle}`);
     } catch (error) {
       console.error('Failed to accept operation:', error);
     } finally {
       setAcceptingOperation(null);
+    }
+  };
+
+  /**
+   * Handles completing an operation with XP and token rewards
+   *
+   * @param {string} operationId - The ID of the operation to complete
+   */
+  const handleCompleteOperation = async (operationId: string) => {
+    const operation = MOCK_OPERATIONS.find(op => op.id === operationId);
+    if (!operation) return;
+
+    setCompletingOperation(operationId);
+
+    try {
+      // Award XP and tokens
+      const reward = await awardXP(profile, operation, updateProfile);
+
+      setLastReward(reward);
+      setShowRewardModal(true);
+
+      // Call parent callback
+      onCompleteOperation(operationId);
+
+      console.log(`Operation ${operationId} completed! Awarded ${reward.xpEarned} XP`);
+
+    } catch (error) {
+      console.error('Failed to complete operation:', error);
+    } finally {
+      setCompletingOperation(null);
     }
   };
 

@@ -1,16 +1,65 @@
 import React, { useState, useMemo } from 'react';
 import { OperatorProfile, SKILL_TAGS, SkillTag } from '../types/operator';
+import { MOCK_OPERATORS } from '../data/mockOperators';
 
+/**
+ * Props for the OperatorDirectory component
+ * @interface OperatorDirectoryProps
+ */
 interface OperatorDirectoryProps {
+  /** Callback to navigate back to the dashboard */
   onBack: () => void;
 }
 
-import { MOCK_OPERATORS } from '../data/mockOperators';
-
+/**
+ * Operator Directory Component
+ *
+ * A comprehensive directory for discovering and searching operators within
+ * the network. Provides filtering by skills, sorting by various criteria,
+ * and search functionality to help operators find collaborators.
+ *
+ * Features:
+ * - Real-time search by operator handle
+ * - Filter by skill specializations
+ * - Sort by newest, alphabetical, or XP
+ * - Responsive operator profile cards
+ * - Live activity and connection data
+ * - Clear filters functionality
+ *
+ * @component
+ * @param {OperatorDirectoryProps} props - Component props
+ * @returns {JSX.Element} The operator directory interface
+ *
+ * @example
+ * ```tsx
+ * <OperatorDirectory
+ *   onBack={() => setView('dashboard')}
+ * />
+ * ```
+ */
 export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<SkillTag | 'all'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'alphabetical' | 'xp'>('newest');
+  const [isLoading, setIsLoading] = useState(true);
+  const [networkError, setNetworkError] = useState<string | null>(null);
+
+  // Simulate initial loading
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        // Simulate potential network error (5% chance)
+        if (Math.random() < 0.05) {
+          throw new Error('Failed to load operator directory');
+        }
+        setIsLoading(false);
+      } catch (error) {
+        setNetworkError(error instanceof Error ? error.message : 'Loading failed');
+        setIsLoading(false);
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredOperators = useMemo(() => {
     let filtered = MOCK_OPERATORS.filter(op => {
@@ -35,6 +84,42 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
 
     return filtered;
   }, [searchQuery, selectedSkill, sortBy]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen terminal-bg flex items-center justify-center">
+        <div className="operator-card rounded-lg p-8 text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-white">Loading Operator Directory...</div>
+          <div className="text-sm text-[var(--color-text-muted)]">Discovering network operators</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (networkError) {
+    return (
+      <div className="min-h-screen terminal-bg flex items-center justify-center">
+        <div className="operator-card rounded-lg p-8 text-center space-y-4">
+          <div className="w-8 h-8 text-red-500 mx-auto">⚠️</div>
+          <div className="text-white">Failed to Load Directory</div>
+          <div className="text-sm text-red-400">{networkError}</div>
+          <button
+            onClick={() => {
+              setNetworkError(null);
+              setIsLoading(true);
+              setTimeout(() => setIsLoading(false), 1000);
+            }}
+            className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen terminal-bg">

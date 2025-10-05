@@ -3,18 +3,66 @@ import { Machine, MachineCategory } from '../types/machine';
 import { MOCK_MACHINES } from '../data/mockMachines';
 import { MOCK_OPERATORS } from '../data/mockOperators';
 
+/**
+ * Props for the MachineMarketplace component
+ * @interface MachineMarketplaceProps
+ */
 interface MachineMarketplaceProps {
+  /** Callback to navigate back to the dashboard */
   onBack: () => void;
+  /** Callback when an operator connects to a machine */
   onConnectToMachine: (machineId: string) => void;
 }
 
+/**
+ * All available machine categories in the network
+ * @constant
+ */
 const MACHINE_CATEGORIES: MachineCategory[] = ['Game', 'Tool', 'Product', 'Service', 'Content', 'Infrastructure'];
 
+/**
+ * Machine Marketplace Component
+ *
+ * A comprehensive marketplace for discovering and connecting to Machines of Production.
+ * Operators can browse, filter, and join autonomous systems that generate value
+ * through collaborative operation.
+ *
+ * Features:
+ * - Advanced filtering by category, status, and availability
+ * - Real-time search across names, descriptions, and tags
+ * - Rich machine metadata display (revenue, operators, metrics)
+ * - One-click connection system with operator slot management
+ * - Live links to running machines
+ * - Revenue and operator transparency
+ *
+ * @component
+ * @param {MachineMarketplaceProps} props - Component props
+ * @returns {JSX.Element} The machine marketplace interface
+ *
+ * @example
+ * ```tsx
+ * <MachineMarketplace
+ *   onBack={() => setView('dashboard')}
+ *   onConnectToMachine={(machineId) => handleConnection(machineId)}
+ * />
+ * ```
+ */
 export default function MachineMarketplace({ onBack, onConnectToMachine }: MachineMarketplaceProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MachineCategory | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'Active' | 'Development'>('all');
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectingToMachine, setConnectingToMachine] = useState<string | null>(null);
+
+  // Simulate initial loading
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredMachines = useMemo(() => {
     return MOCK_MACHINES.filter(machine => {
@@ -30,6 +78,42 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
     });
   }, [searchQuery, selectedCategory, selectedStatus, showAvailableOnly]);
 
+  /**
+   * Handles machine connection with error handling and loading states
+   *
+   * @param {string} machineId - The ID of the machine to connect to
+   */
+  const handleMachineConnection = async (machineId: string) => {
+    setConnectingToMachine(machineId);
+    setConnectionError(null);
+
+    try {
+      // Simulate connection delay and potential failure
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // 10% chance of connection failure for demo
+          if (Math.random() < 0.1) {
+            reject(new Error('Connection failed: Machine temporarily unavailable'));
+          } else {
+            resolve(undefined);
+          }
+        }, 2000);
+      });
+
+      onConnectToMachine(machineId);
+    } catch (error) {
+      setConnectionError(error instanceof Error ? error.message : 'Connection failed');
+    } finally {
+      setConnectingToMachine(null);
+    }
+  };
+
+  /**
+   * Retrieves operator handles from operator IDs
+   *
+   * @param {string[]} operatorIds - Array of operator IDs to look up
+   * @returns {string[]} Array of operator handles or 'Unknown' for missing operators
+   */
   const getOperatorNames = (operatorIds: string[]) => {
     return operatorIds.map(id => {
       const operator = MOCK_OPERATORS.find(op => op.id === id);
@@ -37,6 +121,12 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
     });
   };
 
+  /**
+   * Returns the appropriate emoji icon for a machine category
+   *
+   * @param {MachineCategory} category - The machine category
+   * @returns {string} Emoji icon representing the category
+   */
   const getCategoryIcon = (category: MachineCategory) => {
     switch (category) {
       case 'Game': return '🎮';
@@ -49,6 +139,12 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
     }
   };
 
+  /**
+   * Returns the appropriate CSS color class for a machine status
+   *
+   * @param {string} status - The machine status
+   * @returns {string} Tailwind CSS color class for the status
+   */
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Active': return 'text-green-400';
@@ -59,8 +155,38 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
     }
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen terminal-bg flex items-center justify-center">
+        <div className="operator-card rounded-lg p-8 text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-white">Loading Machine Marketplace...</div>
+          <div className="text-sm text-[var(--color-text-muted)]">Fetching available machines</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen terminal-bg">
+      {/* Error Banner */}
+      {connectionError && (
+        <div className="bg-red-900/50 border-b border-red-500/50 px-6 py-3">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-red-300 text-sm">{connectionError}</span>
+            </div>
+            <button
+              onClick={() => setConnectionError(null)}
+              className="text-red-300 hover:text-red-100 text-sm"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="border-b border-[var(--color-primary)]/20 bg-[var(--color-surface)]/50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -250,11 +376,16 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
                     </a>
                   )}
                   <button
-                    onClick={() => onConnectToMachine(machine.id)}
-                    disabled={machine.operators.length >= machine.maxOperators}
-                    className="flex-1 py-2 bg-[var(--color-primary)] text-black rounded hover:bg-[var(--color-primary)]/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                    onClick={() => handleMachineConnection(machine.id)}
+                    disabled={machine.operators.length >= machine.maxOperators || connectingToMachine === machine.id}
+                    className="flex-1 py-2 bg-[var(--color-primary)] text-black rounded hover:bg-[var(--color-primary)]/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center justify-center"
                   >
-                    {machine.operators.length >= machine.maxOperators ? 'Full' : 'Connect'}
+                    {connectingToMachine === machine.id ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Connecting...
+                      </>
+                    ) : machine.operators.length >= machine.maxOperators ? 'Full' : 'Connect'}
                   </button>
                 </div>
               </div>

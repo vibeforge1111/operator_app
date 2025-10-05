@@ -1,44 +1,148 @@
 import React, { useState, useEffect } from 'react';
 import { OperatorProfile } from '../types/operator';
 
+/**
+ * Props for the OperatorDashboard component
+ * @interface OperatorDashboardProps
+ */
 interface OperatorDashboardProps {
+  /** The operator's profile data */
   profile: OperatorProfile;
+  /** Callback to navigate to the operator directory */
   onViewDirectory: () => void;
+  /** Callback to navigate to the machine marketplace */
   onViewMachines: () => void;
+  /** Callback to navigate to the operation board */
+  onViewOperations: () => void;
 }
 
-export default function OperatorDashboard({ profile, onViewDirectory, onViewMachines }: OperatorDashboardProps) {
+/**
+ * Operator Dashboard Component
+ *
+ * Personal command center for operators showing real-time network activity,
+ * operator status, and quick access to core network features.
+ *
+ * Features:
+ * - Live network heartbeat visualization
+ * - Real-time fee routing activity
+ * - Operator profile and reputation display
+ * - Connected machines and active operations overview
+ * - Navigation to directory and machine marketplace
+ *
+ * @component
+ * @param {OperatorDashboardProps} props - Component props
+ * @returns {JSX.Element} The operator dashboard interface
+ *
+ * @example
+ * ```tsx
+ * <OperatorDashboard
+ *   profile={operatorProfile}
+ *   onViewDirectory={() => setView('directory')}
+ *   onViewMachines={() => setView('machines')}
+ * />
+ * ```
+ */
+export default function OperatorDashboard({ profile, onViewDirectory, onViewMachines, onViewOperations }: OperatorDashboardProps) {
   const [heartbeatCount, setHeartbeatCount] = useState(0);
   const [lastHeartbeat, setLastHeartbeat] = useState(new Date());
   const [feeRoutes, setFeeRoutes] = useState<Array<{id: string, amount: number, timestamp: Date}>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [isHeartbeatActive, setIsHeartbeatActive] = useState(true);
 
-  // Simulate heartbeat
+  // Initialize dashboard and simulate heartbeat
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeartbeatCount(prev => prev + 1);
-      setLastHeartbeat(new Date());
+    // Simulate initial loading
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+    // Simulate heartbeat with error recovery
+    const interval = setInterval(() => {
+      try {
+        if (isHeartbeatActive) {
+          setHeartbeatCount(prev => prev + 1);
+          setLastHeartbeat(new Date());
+          setNetworkError(null); // Clear any previous errors
+        }
+      } catch (error) {
+        console.error('Heartbeat error:', error);
+        setNetworkError('Network heartbeat interrupted');
+        setIsHeartbeatActive(false);
 
-  // Simulate fee routing
+        // Attempt to restart heartbeat after 5 seconds
+        setTimeout(() => {
+          setIsHeartbeatActive(true);
+          setNetworkError(null);
+        }, 5000);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(loadingTimer);
+      clearInterval(interval);
+    };
+  }, [isHeartbeatActive]);
+
+  // Simulate fee routing with error handling
   useEffect(() => {
     const interval = setInterval(() => {
-      const amount = 100 + Math.random() * 900;
-      const newRoute = {
-        id: Date.now().toString(),
-        amount: Math.round(amount * 100) / 100,
-        timestamp: new Date()
-      };
-      setFeeRoutes(prev => [newRoute, ...prev.slice(0, 9)]); // Keep last 10
+      try {
+        // Simulate occasional network failures (5% chance)
+        if (Math.random() < 0.05) {
+          throw new Error('Fee routing service temporarily unavailable');
+        }
+
+        const amount = 100 + Math.random() * 900;
+        const newRoute = {
+          id: Date.now().toString(),
+          amount: Math.round(amount * 100) / 100,
+          timestamp: new Date()
+        };
+        setFeeRoutes(prev => [newRoute, ...prev.slice(0, 9)]); // Keep last 10
+        setNetworkError(null); // Clear any routing errors
+      } catch (error) {
+        console.error('Fee routing error:', error);
+        // Don't set network error for fee routing issues as heartbeat is more critical
+      }
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen terminal-bg flex items-center justify-center">
+        <div className="operator-card rounded-lg p-8 text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-white">Initializing Operator Dashboard...</div>
+          <div className="text-sm text-[var(--color-text-muted)]">Connecting to network services</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen terminal-bg">
+      {/* Error Banner */}
+      {networkError && (
+        <div className="bg-red-900/50 border-b border-red-500/50 px-6 py-3">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-red-300 text-sm">{networkError}</span>
+            </div>
+            <button
+              onClick={() => setNetworkError(null)}
+              className="text-red-300 hover:text-red-100 text-sm"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b border-[var(--color-primary)]/20 bg-[var(--color-surface)]/50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -167,7 +271,10 @@ export default function OperatorDashboard({ profile, onViewDirectory, onViewMach
               <div className="text-sm text-[var(--color-text-muted)]">
                 Check the mission board for opportunities
               </div>
-              <button className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors">
+              <button
+                onClick={onViewOperations}
+                className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
+              >
                 Mission Board
               </button>
             </div>
@@ -189,8 +296,17 @@ export default function OperatorDashboard({ profile, onViewDirectory, onViewMach
                 <span className="text-white font-mono text-sm">{lastHeartbeat.toLocaleTimeString()}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-pulse"></div>
-                <span className="text-[var(--color-primary)] text-sm">Live</span>
+                {isHeartbeatActive ? (
+                  <>
+                    <div className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-pulse"></div>
+                    <span className="text-[var(--color-primary)] text-sm">Live</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-red-400 text-sm">Reconnecting...</span>
+                  </>
+                )}
               </div>
             </div>
           </div>

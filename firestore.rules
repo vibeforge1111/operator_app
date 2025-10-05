@@ -1,0 +1,277 @@
+// Firebase Security Rules for Operator Network
+//
+// CRITICAL: These rules enforce data security and access control.
+// Any changes must be reviewed for security implications.
+//
+// Last updated: 2024-10-06
+// Maintained by: Operator Network Core Team
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =============================================================================
+    // HELPER FUNCTIONS
+    // =============================================================================
+
+    /**
+     * Validates if the request contains a valid wallet signature
+     * This should be verified by Cloud Functions before writing to Firestore
+     */
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    /**
+     * Validates if the authenticated user owns the wallet address
+     * The auth.uid should be the wallet address after signature verification
+     */
+    function isOwner(walletAddress) {
+      return isAuthenticated() && request.auth.uid == walletAddress;
+    }
+
+    /**
+     * Validates operator handle format
+     * Must match the Zod schema requirements
+     */
+    function isValidHandle(handle) {
+      return handle is string &&
+             handle.size() >= 3 &&
+             handle.size() <= 20 &&
+             handle.matches('^[a-zA-Z0-9_]+$');
+    }
+
+    /**
+     * Validates skill tags array
+     * Must contain only allowed skills and be within limits
+     */
+    function isValidSkills(skills) {
+      let allowedSkills = ['Dev', 'Design', 'VibeOps', 'BizOps', 'Narrative', 'Coordination'];
+      return skills is list &&
+             skills.size() >= 1 &&
+             skills.size() <= 5 &&
+             skills.toSet().hasOnly(allowedSkills.toSet());
+    }
+
+    /**
+     * Validates that required fields are present and correctly typed
+     */
+    function hasRequiredOperatorFields(data) {
+      return 'walletAddress' in data &&
+             'handle' in data &&
+             'skills' in data &&
+             'xp' in data &&
+             'rank' in data &&
+             'connectedMachines' in data &&
+             'activeOps' in data &&
+             'createdAt' in data &&
+             'updatedAt' in data &&
+             'lastActive' in data;
+    }
+
+    // =============================================================================
+    // OPERATORS COLLECTION
+    // =============================================================================
+
+    match /operators/{walletAddress} {
+      // Read access: Public for directory functionality
+      // All operators should be discoverable for collaboration
+      allow read: if true;
+
+      // Create access: Only by wallet owner with valid data
+      allow create: if isOwner(walletAddress) &&
+                       hasRequiredOperatorFields(request.resource.data) &&
+                       isValidHandle(request.resource.data.handle) &&
+                       isValidSkills(request.resource.data.skills) &&
+                       request.resource.data.walletAddress == walletAddress &&
+                       request.resource.data.xp is int &&
+                       request.resource.data.xp >= 0 &&
+                       request.resource.data.connectedMachines is int &&
+                       request.resource.data.connectedMachines >= 0 &&
+                       request.resource.data.activeOps is int &&
+                       request.resource.data.activeOps >= 0 &&
+                       request.resource.data.createdAt is timestamp &&
+                       request.resource.data.updatedAt is timestamp &&
+                       request.resource.data.lastActive is timestamp;
+
+      // Update access: Only by wallet owner with valid data
+      // Cannot change walletAddress, handle, or createdAt after creation
+      allow update: if isOwner(walletAddress) &&
+                       hasRequiredOperatorFields(request.resource.data) &&
+                       request.resource.data.walletAddress == resource.data.walletAddress &&
+                       request.resource.data.handle == resource.data.handle &&
+                       request.resource.data.createdAt == resource.data.createdAt &&
+                       isValidSkills(request.resource.data.skills) &&
+                       request.resource.data.xp is int &&
+                       request.resource.data.xp >= resource.data.xp && // XP can only increase
+                       request.resource.data.connectedMachines is int &&
+                       request.resource.data.connectedMachines >= 0 &&
+                       request.resource.data.activeOps is int &&
+                       request.resource.data.activeOps >= 0 &&
+                       request.resource.data.updatedAt is timestamp &&
+                       request.resource.data.lastActive is timestamp;
+
+      // Delete access: Only by wallet owner (for account deletion)
+      allow delete: if isOwner(walletAddress);
+    }
+
+    // =============================================================================
+    // MACHINES COLLECTION
+    // =============================================================================
+
+    match /machines/{machineId} {
+      // Read access: Public for marketplace functionality
+      // All machines should be discoverable for connections
+      allow read: if true;
+
+      // Create access: Only by authenticated users
+      // Machine creation requires verification of ownership
+      allow create: if isAuthenticated() &&
+                       'name' in request.resource.data &&
+                       'description' in request.resource.data &&
+                       'category' in request.resource.data &&
+                       'status' in request.resource.data &&
+                       'operators' in request.resource.data &&
+                       'maxOperators' in request.resource.data &&
+                       'earnings' in request.resource.data &&
+                       'metrics' in request.resource.data &&
+                       'tags' in request.resource.data &&
+                       'createdAt' in request.resource.data &&
+                       'updatedAt' in request.resource.data &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() >= 1 &&
+                       request.resource.data.name.size() <= 100 &&
+                       request.resource.data.description is string &&
+                       request.resource.data.description.size() >= 1 &&
+                       request.resource.data.description.size() <= 1000 &&
+                       request.resource.data.category in ['Game', 'Tool', 'Product', 'Service', 'Content', 'Infrastructure'] &&
+                       request.resource.data.status in ['Active', 'Development', 'Maintenance', 'Archived'] &&
+                       request.resource.data.operators is list &&
+                       request.resource.data.operators.size() <= 20 &&
+                       request.resource.data.maxOperators is int &&
+                       request.resource.data.maxOperators >= 1 &&
+                       request.resource.data.maxOperators <= 20 &&
+                       request.resource.data.tags is list &&
+                       request.resource.data.tags.size() <= 10;
+
+      // Update access: Only by machine operators or owner
+      // Must maintain data integrity and cannot change immutable fields
+      allow update: if isAuthenticated() &&
+                       (request.auth.uid in resource.data.operators ||
+                        request.auth.uid == resource.data.owner) &&
+                       request.resource.data.name == resource.data.name &&
+                       request.resource.data.createdAt == resource.data.createdAt &&
+                       request.resource.data.operators is list &&
+                       request.resource.data.operators.size() <= request.resource.data.maxOperators &&
+                       request.resource.data.updatedAt is timestamp;
+
+      // Delete access: Only by machine owner
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == resource.data.owner;
+    }
+
+    // =============================================================================
+    // MACHINE CONNECTIONS COLLECTION
+    // =============================================================================
+
+    match /machine_connections/{connectionId} {
+      // Read access: Public for transparency
+      // Machine connections should be visible for collaboration tracking
+      allow read: if true;
+
+      // Create access: Only by the operator being connected
+      // Prevents unauthorized connections to machines
+      allow create: if isAuthenticated() &&
+                       'machineId' in request.resource.data &&
+                       'operatorId' in request.resource.data &&
+                       'role' in request.resource.data &&
+                       'joinedAt' in request.resource.data &&
+                       'contribution' in request.resource.data &&
+                       'sharePercentage' in request.resource.data &&
+                       request.resource.data.operatorId == request.auth.uid &&
+                       request.resource.data.role in ['Owner', 'Contributor', 'Operator'] &&
+                       request.resource.data.contribution is string &&
+                       request.resource.data.contribution.size() >= 10 &&
+                       request.resource.data.contribution.size() <= 500 &&
+                       request.resource.data.sharePercentage is number &&
+                       request.resource.data.sharePercentage >= 0 &&
+                       request.resource.data.sharePercentage <= 100 &&
+                       request.resource.data.joinedAt is timestamp;
+
+      // Update access: Only by the connected operator or machine owner
+      // Allows updating contribution details and share percentages
+      allow update: if isAuthenticated() &&
+                       (request.auth.uid == resource.data.operatorId ||
+                        request.auth.uid == resource.data.machineOwner) &&
+                       request.resource.data.machineId == resource.data.machineId &&
+                       request.resource.data.operatorId == resource.data.operatorId &&
+                       request.resource.data.joinedAt == resource.data.joinedAt;
+
+      // Delete access: Only by the connected operator or machine owner
+      // Allows disconnection from machines
+      allow delete: if isAuthenticated() &&
+                       (request.auth.uid == resource.data.operatorId ||
+                        request.auth.uid == resource.data.machineOwner);
+    }
+
+    // =============================================================================
+    // ACTIVITY LOGS COLLECTION
+    // =============================================================================
+
+    match /activity_logs/{logId} {
+      // Read access: Public for transparency
+      // Activity logs provide network transparency
+      allow read: if true;
+
+      // Create access: Only by authenticated users for their own activities
+      // Prevents spam and ensures data integrity
+      allow create: if isAuthenticated() &&
+                       'operatorId' in request.resource.data &&
+                       'action' in request.resource.data &&
+                       'timestamp' in request.resource.data &&
+                       'metadata' in request.resource.data &&
+                       request.resource.data.operatorId == request.auth.uid &&
+                       request.resource.data.action is string &&
+                       request.resource.data.action.size() >= 1 &&
+                       request.resource.data.action.size() <= 100 &&
+                       request.resource.data.timestamp is timestamp;
+
+      // No updates or deletes allowed for activity logs
+      // Maintains immutable audit trail
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // =============================================================================
+    // SYSTEM COLLECTIONS (Read-only)
+    // =============================================================================
+
+    // Skill taxonomy - read-only reference data
+    match /skill_taxonomy/{skillId} {
+      allow read: if true;
+      allow write: if false; // Only updated via Cloud Functions
+    }
+
+    // Machine categories - read-only reference data
+    match /machine_categories/{categoryId} {
+      allow read: if true;
+      allow write: if false; // Only updated via Cloud Functions
+    }
+
+    // Network statistics - read-only aggregated data
+    match /network_stats/{statId} {
+      allow read: if true;
+      allow write: if false; // Only updated via Cloud Functions
+    }
+
+    // =============================================================================
+    // DENY ALL OTHER COLLECTIONS
+    // =============================================================================
+
+    // Explicitly deny access to any collections not defined above
+    // This provides security by default for new collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

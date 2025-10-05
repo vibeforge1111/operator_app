@@ -4,6 +4,35 @@ import { WalletDisconnectButton } from '@solana/wallet-adapter-react-ui';
 import { useOperatorProfile } from '../hooks/useOperatorProfile';
 import { SKILL_TAGS, SKILL_DESCRIPTIONS, SkillTag } from '../types/operator';
 
+/**
+ * Operator Registration Component
+ *
+ * Initial onboarding flow for new operators joining the network.
+ * Handles wallet authentication, profile creation, and skill selection
+ * to establish persistent operator identities.
+ *
+ * Features:
+ * - Solana wallet integration with connection status
+ * - Handle validation (3-20 chars, alphanumeric + underscore)
+ * - Multi-select skill system (1-5 skills max)
+ * - Real-time validation feedback
+ * - Secure profile creation with error handling
+ * - Responsive design with terminal aesthetics
+ *
+ * Security:
+ * - Client-side validation with server-side verification
+ * - Wallet signature required for profile creation
+ * - Input sanitization and length limits
+ * - Error handling for network issues
+ *
+ * @component
+ * @returns {JSX.Element} The operator registration interface
+ *
+ * @example
+ * ```tsx
+ * <OperatorRegistration />
+ * ```
+ */
 export default function OperatorRegistration() {
   const { publicKey } = useWallet();
   const { createProfile } = useOperatorProfile(publicKey?.toString());
@@ -13,6 +42,14 @@ export default function OperatorRegistration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  /**
+   * Toggles a skill in the selected skills array
+   *
+   * Enforces the 5-skill maximum limit and prevents duplicates.
+   * Allows deselecting skills by clicking them again.
+   *
+   * @param {SkillTag} skill - The skill to toggle
+   */
   const handleSkillToggle = (skill: SkillTag) => {
     setSelectedSkills(prev => {
       if (prev.includes(skill)) {
@@ -25,6 +62,14 @@ export default function OperatorRegistration() {
     });
   };
 
+  /**
+   * Handles form submission for operator registration
+   *
+   * Validates input, creates the operator profile, and handles errors.
+   * Requires wallet connection and valid handle/skills selection.
+   *
+   * @param {React.FormEvent} e - The form submission event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!handle.trim() || selectedSkills.length === 0) return;
@@ -41,6 +86,17 @@ export default function OperatorRegistration() {
     }
   };
 
+  /**
+   * Validates operator handle format
+   *
+   * Ensures handle meets security requirements:
+   * - 3-20 characters length
+   * - Alphanumeric characters and underscores only
+   * - No special characters or spaces
+   *
+   * @param {string} h - The handle to validate
+   * @returns {boolean} True if handle is valid
+   */
   const isValidHandle = (h: string) => {
     return h.length >= 3 && h.length <= 20 && /^[a-zA-Z0-9_]+$/.test(h);
   };

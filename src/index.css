@@ -2,36 +2,244 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Core Design System Variables */
 :root {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Light Mode */
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --border: #e5e5e5;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --sidebar: #fafafa;
 
-  --color-primary: #14f195;
-  --color-secondary: #9945ff;
-  --color-bg: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-text: #ffffff;
-  --color-text-muted: #888888;
+  /* Semantic Status Colors */
+  --status-active: #22c55e;
+  --status-inactive: #9ca3af;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
+
+  /* Operator Network Brand */
+  --color-primary: #00ff88;
+  --color-secondary: #7c3aed;
+  --color-accent: #fbbf24;
+
+  /* Spacing & Layout */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.75rem;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lift: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --border: #2a2a2a;
+  --muted: #1a1a1a;
+  --muted-foreground: #a3a3a3;
+  --sidebar: #141414;
+}
+
+/* Tailwind v4 Custom Properties Mapping */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-status-active: var(--status-active);
+  --color-status-inactive: var(--status-inactive);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
 }
 
 body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
-  min-height: 100vh;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+  font-weight: 400;
+  overflow-x: hidden;
 }
 
+/* Custom Utility Classes */
+.clean-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.2s ease;
+}
+
+.clean-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-strong);
+}
+
+/* Status Badges */
+.status-running {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background: var(--status-active);
+  color: white;
+  border: 1px solid var(--status-active);
+  font-weight: 500;
+}
+
+.status-idle {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.status-pending {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background: var(--status-warning);
+  color: white;
+  border: 1px solid var(--status-warning);
+  font-weight: 500;
+}
+
+.status-completed {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background: var(--status-active);
+  color: white;
+  border: 1px solid var(--status-active);
+  font-weight: 500;
+}
+
+/* Progress Bars */
+.progress-bar {
+  height: 0.25rem;
+  background: var(--muted);
+  border-radius: 9999px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--status-active);
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+  transform-origin: left;
+}
+
+/* Status Dots */
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot-running {
+  background: var(--status-active);
+  animation: subtle-pulse 2s infinite;
+}
+
+.status-dot-idle {
+  background: var(--status-inactive);
+}
+
+/* Hide Scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Core Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes progress-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 2s infinite;
+}
+
+.animate-progress-fill {
+  animation: progress-fill 1s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.2s ease-out;
+}
+
+/* Dark Mode Custom Variant */
+@custom-variant dark (&:is(.dark *));
+
+/* Legacy Operator Network Styles (for backward compatibility) */
 .terminal-bg {
-  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-}
-
-.glow {
-  box-shadow: 0 0 20px rgba(20, 241, 149, 0.3);
+  background: var(--background);
 }
 
 .operator-card {
-  background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(20, 241, 149, 0.2);
-  backdrop-filter: blur(10px);
+  @apply clean-card;
 }

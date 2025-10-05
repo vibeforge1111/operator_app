@@ -1,0 +1,118 @@
+/**
+ * Minimal Dashboard Layout
+ *
+ * Three-layer layout with collapsible sidebar, fixed top bar, and main content
+ */
+
+import React, { useState, useEffect } from 'react';
+import { CollapsibleSidebar } from './CollapsibleSidebar';
+import { MinimalTopBar } from './MinimalTopBar';
+import { MinimalDashboard } from '../MinimalDashboard';
+import OperatorDirectory from '../OperatorDirectory';
+import MachineMarketplace from '../MachineMarketplace';
+import OperationBoard from '../OperationBoard';
+import { OperatorProfile } from '../../types/operator';
+
+interface MinimalDashboardLayoutProps {
+  profile: OperatorProfile;
+  onConnectWallet: () => void;
+  demoMode: boolean;
+}
+
+export function MinimalDashboardLayout({
+  profile,
+  onConnectWallet,
+  demoMode
+}: MinimalDashboardLayoutProps) {
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(256); // Default expanded width
+
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  };
+
+  // Initialize dark mode
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Listen for sidebar width changes
+  useEffect(() => {
+    const updateSidebarWidth = () => {
+      const sidebar = document.querySelector('[data-sidebar]');
+      if (sidebar) {
+        setSidebarWidth(sidebar.getBoundingClientRect().width);
+      }
+    };
+
+    // Update initially and on resize
+    updateSidebarWidth();
+    window.addEventListener('resize', updateSidebarWidth);
+
+    // Also listen for transition end to catch collapse/expand
+    const sidebar = document.querySelector('[data-sidebar]');
+    if (sidebar) {
+      sidebar.addEventListener('transitionend', updateSidebarWidth);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateSidebarWidth);
+      if (sidebar) {
+        sidebar.removeEventListener('transitionend', updateSidebarWidth);
+      }
+    };
+  }, []);
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <MinimalDashboard profile={profile} />;
+      case 'operators':
+        return <OperatorDirectory onBack={() => setCurrentView('dashboard')} />;
+      case 'machines':
+        return <MachineMarketplace onBack={() => setCurrentView('dashboard')} onConnectToMachine={() => {}} />;
+      case 'operations':
+        return <OperationBoard profile={profile} onBack={() => setCurrentView('dashboard')} onCompleteOperation={() => {}} />;
+      default:
+        return <MinimalDashboard profile={profile} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Collapsible Sidebar */}
+      <CollapsibleSidebar currentView={currentView} onViewChange={setCurrentView} />
+
+      {/* Fixed Top Bar */}
+      <MinimalTopBar
+        profile={profile}
+        onConnectWallet={onConnectWallet}
+        demoMode={demoMode}
+        isDarkMode={isDarkMode}
+        onThemeToggle={handleThemeToggle}
+        sidebarWidth={sidebarWidth}
+      />
+
+      {/* Main Content Area */}
+      <main
+        className="pt-16 min-h-screen transition-all duration-200 scrollbar-hide overflow-auto"
+        style={{ marginLeft: `${sidebarWidth}px` }}
+      >
+        <div className="animate-fade-in">
+          {renderContent()}
+        </div>
+      </main>
+    </div>
+  );
+}

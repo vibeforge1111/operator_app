@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MinimalDashboardLayout } from './components/layout/MinimalDashboardLayout';
 import OperatorDashboard from './components/OperatorDashboard';
 import OperatorDirectory from './components/OperatorDirectory';
 import MachineMarketplace from './components/MachineMarketplace';
@@ -45,7 +46,7 @@ function App() {
     handle: 'demo_operator',
     skills: ['Dev', 'Design', 'VibeOps'],
     xp: 2750,
-    rank: 'Journeyman',
+    rank: 'Senior',
     connectedMachines: 3,
     activeOps: 2,
     createdAt: new Date('2024-10-01'),
@@ -173,11 +174,8 @@ function App() {
   if (currentView === 'dashboard') {
     return (
       <>
-        <OperatorDashboard
+        <MinimalDashboardLayout
           profile={demoProfile}
-          onViewDirectory={() => setCurrentView('directory')}
-          onViewMachines={() => setCurrentView('machines')}
-          onViewOperations={() => setCurrentView('operations')}
           onConnectWallet={handleConnectWallet}
           demoMode={demoMode}
         />

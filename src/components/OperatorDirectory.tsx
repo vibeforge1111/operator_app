@@ -2,6 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { OperatorProfile, SKILL_TAGS, SkillTag, OperatorRank } from '../types/operator';
 import { getOperators } from '../lib/firebase/operators';
 import { subscribeToOperators, RealtimeManager } from '../lib/firebase/realtime';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, EnhancedCard } from './ui/Card';
+import { Button, InteractiveButton } from './ui/Button';
+import { Badge, StatusBadge, SkillBadge } from './ui/Badge';
+import { LoadingSpinner, FullPageLoading, CardLoading } from './ui/Loading';
+import { AnimatedCounter } from './ui/AnimatedCounter';
 
 /**
  * Props for the OperatorDirectory component
@@ -117,13 +122,12 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen terminal-bg flex items-center justify-center">
-        <div className="operator-card rounded-lg p-8 text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-white">Loading Operator Directory...</div>
-          <div className="text-sm text-[var(--color-text-muted)]">Discovering network operators</div>
-        </div>
-      </div>
+      <FullPageLoading
+        title="Loading Operator Directory..."
+        description="Discovering network operators"
+        variant="spinner"
+        size="lg"
+      />
     );
   }
 
@@ -172,19 +176,26 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             <h1 className="text-xl font-bold text-[var(--color-primary)]">OPERATOR DIRECTORY</h1>
             <p className="text-sm text-[var(--color-text-muted)]">Discover and connect with operators</p>
           </div>
-          <button
+          <Button
+            variant="secondary"
             onClick={onBack}
-            className="px-4 py-2 bg-[var(--color-surface)] text-white border border-[var(--color-primary)]/30 rounded hover:border-[var(--color-primary)]/50 transition-colors"
           >
             ← Back to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Search and Filters */}
-        <div className="operator-card rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <EnhancedCard variant="glass" className="p-8 bg-gradient-to-r from-[var(--color-surface)]/90 via-[var(--color-surface)]/95 to-[var(--color-surface)]/90 backdrop-blur-xl border-2 border-[var(--color-primary)]/40 shadow-2xl shadow-[var(--color-primary)]/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/5 via-transparent to-[var(--color-secondary)]/5 pointer-events-none"></div>
+          <div className="relative z-10">
+            <h2 className="text-xl font-bold text-[var(--color-primary)] mb-6 flex items-center gap-3">
+              <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-pulse"></span>
+              Advanced Operator Search
+              <span className="text-sm font-normal text-[var(--color-text-muted)]">Discover network talent</span>
+            </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Search */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-white">Search Operators</label>
@@ -242,55 +253,62 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
               </select>
             </div>
           </div>
-        </div>
+          </div>
+        </EnhancedCard>
 
         {/* Results Count */}
-        <div className="text-[var(--color-text-muted)] text-sm">
-          {filteredOperators.length} operator{filteredOperators.length !== 1 ? 's' : ''} found
+        <div className="text-[var(--color-text-muted)] text-sm flex items-center gap-2">
+          <AnimatedCounter value={filteredOperators.length} />
+          <span>operator{filteredOperators.length !== 1 ? 's' : ''} found</span>
         </div>
 
         {/* Operator Grid */}
         {filteredOperators.length === 0 ? (
-          <div className="operator-card rounded-lg p-12 text-center space-y-4">
+          <EnhancedCard variant="clean" className="p-12 text-center space-y-4">
             <div className="text-[var(--color-text-muted)]">No operators found with these criteria</div>
-            <button
+            <InteractiveButton
+              variant="outline"
               onClick={() => {
                 setSearchQuery('');
                 setSelectedSkill('all');
                 setSelectedRank('all');
               }}
-              className="px-4 py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors"
             >
               Clear Filters
-            </button>
-          </div>
+            </InteractiveButton>
+          </EnhancedCard>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOperators.map((operator) => (
-              <div key={operator.id} className="operator-card rounded-lg p-6 space-y-4 hover:border-[var(--color-primary)]/40 transition-colors">
+              <EnhancedCard key={operator.id} variant="elevated" hover interactive className="p-6 space-y-4 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-[var(--color-primary)]/10 border-2 border-[var(--color-primary)]/30 hover:border-[var(--color-primary)]/60 bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface)]/80">
                 {/* Operator Header */}
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-white">
+                <div className="space-y-2 relative">
+                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-[var(--color-primary)] rounded-full animate-pulse shadow-lg shadow-[var(--color-primary)]/50"></div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-ping"></span>
                     <span className="text-[var(--color-primary)]">@</span>{operator.handle}
+                    <span className="text-xs bg-[var(--color-primary)]/20 text-[var(--color-primary)] px-2 py-0.5 rounded-full font-normal">ONLINE</span>
                   </h3>
                   <div className="flex items-center space-x-4 text-sm">
-                    <span className="text-[var(--color-primary)]">{operator.xp} XP</span>
+                    <span className="text-[var(--color-primary)]">
+                      <AnimatedCounter value={operator.xp} suffix=" XP" />
+                    </span>
                     <span className="text-[var(--color-text-muted)]">|</span>
-                    <span className="text-white">{operator.rank}</span>
+                    <Badge variant="secondary" size="sm">{operator.rank}</Badge>
                   </div>
                 </div>
 
                 {/* Skills */}
                 <div className="space-y-2">
                   <div className="text-sm text-[var(--color-text-muted)]">Skills:</div>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-2">
                     {operator.skills.map((skill) => (
-                      <span
+                      <SkillBadge
                         key={skill}
-                        className="px-2 py-1 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded text-xs border border-[var(--color-primary)]/30"
-                      >
-                        {skill}
-                      </span>
+                        skill={skill}
+                        interactive
+                        className="bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-secondary)]/20 border-[var(--color-primary)]/40 text-[var(--color-primary)] hover:from-[var(--color-primary)]/30 hover:to-[var(--color-secondary)]/30 hover:border-[var(--color-primary)]/60 transform hover:scale-110 shadow-lg shadow-[var(--color-primary)]/20"
+                      />
                     ))}
                   </div>
                 </div>
@@ -299,19 +317,29 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-1">
                     <div className="text-[var(--color-text-muted)]">Machines:</div>
-                    <div className="text-white font-medium">{operator.connectedMachines}</div>
+                    <div className="text-white font-medium">
+                      <AnimatedCounter value={operator.connectedMachines} />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-[var(--color-text-muted)]">Active Ops:</div>
-                    <div className="text-white font-medium">{operator.activeOps}</div>
+                    <div className="text-white font-medium">
+                      <AnimatedCounter value={operator.activeOps} />
+                    </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="pt-2 border-t border-[var(--color-primary)]/20">
-                  <button className="w-full py-2 bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors text-sm">
-                    View Profile
-                  </button>
+                <div className="pt-4 border-t border-[var(--color-primary)]/30">
+                  <InteractiveButton
+                    variant="operator"
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-black font-bold hover:from-[var(--color-primary)]/90 hover:to-[var(--color-secondary)]/90 shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40 transform hover:scale-105"
+                    glow
+                    pulse={false}
+                  >
+                    🔍 View Profile
+                  </InteractiveButton>
                 </div>
 
                 {/* Last Active */}
@@ -320,7 +348,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
                     ? operator.lastActive.toLocaleDateString()
                     : new Date(operator.lastActive).toLocaleDateString()}
                 </div>
-              </div>
+              </EnhancedCard>
             ))}
           </div>
         )}

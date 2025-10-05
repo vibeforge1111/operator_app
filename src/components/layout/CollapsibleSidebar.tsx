@@ -28,19 +28,19 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
     <div
       data-sidebar
       className={`
-        fixed left-0 top-0 h-full bg-[var(--sidebar)] border-r border-[var(--border)]
+        fixed left-0 top-0 h-full bg-[var(--sidebar)] border-r border-[var(--sidebar-border)]
         flex flex-col z-40 transition-all duration-200 ease-out
         ${isCollapsed ? 'w-16' : 'w-64'}
       `}
     >
       {/* Logo/Brand */}
-      <div className="h-16 flex items-center px-4 border-b border-[var(--border)]">
+      <div className="h-16 flex items-center px-4 border-b border-[var(--sidebar-border)]">
         <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
           <span className="text-black font-bold text-sm">O</span>
         </div>
         {!isCollapsed && (
           <div className="ml-3 animate-fade-in">
-            <h1 className="text-lg font-medium text-[var(--foreground)]">Operator</h1>
+            <h1 className="text-lg font-medium text-[var(--sidebar-foreground)]">Operator</h1>
           </div>
         )}
       </div>
@@ -57,10 +57,10 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
               onClick={() => onViewChange(item.id)}
               className={`
                 w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200
-                hover:bg-[var(--muted)] group relative
+                hover:bg-[var(--sidebar-accent)] group relative
                 ${isActive
-                  ? 'bg-[var(--foreground)] text-[var(--background)] !important'
-                  : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                  ? 'bg-[var(--sidebar-foreground)] text-[var(--sidebar)] !important'
+                  : 'text-[var(--muted-foreground)] hover:text-[var(--sidebar-foreground)]'
                 }
               `}
               title={isCollapsed ? item.label : undefined}
@@ -75,7 +75,7 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
               {/* Tooltip for collapsed state */}
               {isCollapsed && (
                 <div className="
-                  absolute left-full ml-2 px-2 py-1 bg-[var(--foreground)] text-[var(--background)]
+                  absolute left-full ml-2 px-2 py-1 bg-[var(--sidebar-foreground)] text-[var(--sidebar)]
                   text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity
                   whitespace-nowrap pointer-events-none z-50
                 ">
@@ -88,13 +88,13 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="p-2 border-t border-[var(--border)]">
+      <div className="p-2 border-t border-[var(--sidebar-border)]">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="
             w-full flex items-center justify-center px-3 py-2 rounded-lg
-            text-[var(--muted-foreground)] hover:text-[var(--foreground)]
-            hover:bg-[var(--muted)] transition-all duration-200
+            text-[var(--muted-foreground)] hover:text-[var(--sidebar-foreground)]
+            hover:bg-[var(--sidebar-accent)] transition-all duration-200
           "
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >

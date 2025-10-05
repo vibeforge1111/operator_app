@@ -45,9 +45,9 @@ export function MinimalTopBar({
         </div>
 
         {/* Live Status Indicator */}
-        <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-[var(--status-active)]/10 border border-[var(--status-active)]/20">
+        <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-transparent border border-[var(--status-active)]">
           <div className="w-2 h-2 rounded-full bg-[var(--status-active)] animate-subtle-pulse"></div>
-          <span className="text-xs font-medium text-[var(--status-active)]">LIVE</span>
+          <span className="text-xs font-medium text-[var(--foreground)]">LIVE</span>
         </div>
       </div>
 
@@ -57,9 +57,9 @@ export function MinimalTopBar({
         <button
           onClick={onThemeToggle}
           className="
-            w-10 h-10 rounded-lg bg-[var(--muted)] border border-[var(--border)]
+            w-10 h-10 rounded-lg bg-[var(--switch-background)] border border-[var(--border)]
             flex items-center justify-center transition-all duration-200
-            hover:bg-[var(--border)] hover:border-[var(--muted-foreground)]
+            hover:bg-[var(--muted)] hover:border-[var(--muted-foreground)]
             text-[var(--muted-foreground)] hover:text-[var(--foreground)]
           "
           title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}

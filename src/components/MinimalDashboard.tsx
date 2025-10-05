@@ -41,25 +41,25 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
       title: 'Active Operators',
       value: metrics.activeOperators,
       change: '+12.5%',
-      color: 'text-[var(--status-active)]',
+      color: 'text-[var(--foreground)]',
     },
     {
       title: 'Machines Running',
       value: metrics.machinesRunning,
       change: '+8.2%',
-      color: 'text-[var(--color-primary)]',
+      color: 'text-[var(--muted-foreground)]',
     },
     {
       title: 'Total Contributions',
       value: metrics.totalContributions,
       change: '+24.1%',
-      color: 'text-[var(--color-secondary)]',
+      color: 'text-[var(--foreground)]',
     },
     {
       title: 'Community XP',
       value: `${Math.floor(metrics.communityXP / 1000)}K`,
       change: '+15.7%',
-      color: 'text-[var(--status-warning)]',
+      color: 'text-[var(--muted-foreground)]',
     },
   ];
 
@@ -107,12 +107,12 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
               <div className="space-y-4">
                 {liveActivity.map((activity, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center">
-                      <span className="text-black font-bold text-sm">{activity.avatar}</span>
+                    <div className="w-8 h-8 rounded-full bg-[var(--muted)] flex items-center justify-center">
+                      <span className="text-[var(--foreground)] font-bold text-sm">{activity.avatar}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[var(--foreground)]">
-                        <span className="font-medium text-[var(--color-primary)]">{activity.user}</span>{' '}
+                        <span className="font-medium text-[var(--foreground)]">{activity.user}</span>{' '}
                         {activity.action}
                       </p>
                       <p className="text-xs text-[var(--muted-foreground)]">{activity.time}</p>
@@ -137,8 +137,8 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
                 {activeMachines.map((machine, index) => (
                   <div key={machine.id} className="flex items-center justify-between p-4 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors">
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-lg bg-[var(--color-primary)] flex items-center justify-center">
-                        <span className="text-black font-bold">#{index + 1}</span>
+                      <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center">
+                        <span className="text-[var(--foreground)] font-bold">#{index + 1}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -149,11 +149,11 @@ export function MinimalDashboard({ profile }: MinimalDashboardProps) {
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
-                          <span className="font-medium text-[var(--color-primary)]">{machine.owner}</span>
+                          <span className="font-medium text-[var(--foreground)]">{machine.owner}</span>
                           <span>•</span>
                           <span><AnimatedCounter value={machine.runs} /> runs</span>
                           <span>•</span>
-                          <span className="text-[var(--status-active)]">{machine.success}%</span>
+                          <span className="text-[var(--foreground)]">{machine.success}%</span>
                         </div>
                       </div>
                     </div>

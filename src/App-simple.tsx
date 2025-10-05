@@ -3,6 +3,7 @@ import OperatorDashboard from './components/OperatorDashboard';
 import OperatorDirectory from './components/OperatorDirectory';
 import MachineMarketplace from './components/MachineMarketplace';
 import OperationBoard from './components/OperationBoard';
+import NotificationSystem from './components/NotificationSystem';
 import { OperatorProfile } from './types/operator';
 
 /**
@@ -98,15 +99,23 @@ function App() {
   };
 
   if (currentView === 'directory') {
-    return <OperatorDirectory onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <>
+        <OperatorDirectory onBack={() => setCurrentView('dashboard')} />
+        <NotificationSystem />
+      </>
+    );
   }
 
   if (currentView === 'machines') {
     return (
-      <MachineMarketplace
-        onBack={() => setCurrentView('dashboard')}
-        onConnectToMachine={handleConnectToMachine}
-      />
+      <>
+        <MachineMarketplace
+          onBack={() => setCurrentView('dashboard')}
+          onConnectToMachine={handleConnectToMachine}
+        />
+        <NotificationSystem />
+      </>
     );
   }
 
@@ -150,24 +159,30 @@ function App() {
 
   if (currentView === 'operations') {
     return (
-      <OperationBoard
-        profile={demoProfile}
-        onBack={() => setCurrentView('dashboard')}
-        onCompleteOperation={handleCompleteOperation}
-      />
+      <>
+        <OperationBoard
+          profile={demoProfile}
+          onBack={() => setCurrentView('dashboard')}
+          onCompleteOperation={handleCompleteOperation}
+        />
+        <NotificationSystem />
+      </>
     );
   }
 
   if (currentView === 'dashboard') {
     return (
-      <OperatorDashboard
-        profile={demoProfile}
-        onViewDirectory={() => setCurrentView('directory')}
-        onViewMachines={() => setCurrentView('machines')}
-        onViewOperations={() => setCurrentView('operations')}
-        onConnectWallet={handleConnectWallet}
-        demoMode={demoMode}
-      />
+      <>
+        <OperatorDashboard
+          profile={demoProfile}
+          onViewDirectory={() => setCurrentView('directory')}
+          onViewMachines={() => setCurrentView('machines')}
+          onViewOperations={() => setCurrentView('operations')}
+          onConnectWallet={handleConnectWallet}
+          demoMode={demoMode}
+        />
+        <NotificationSystem />
+      </>
     );
   }
 

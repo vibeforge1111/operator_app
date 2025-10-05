@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Machine, MachineCategory } from '../types/machine';
 import { getMachines, connectOperatorToMachine } from '../lib/firebase/machines';
 import { getOperators } from '../lib/firebase/operators';
+import { subscribeToMachines, subscribeToOperators, RealtimeManager } from '../lib/firebase/realtime';
 
 /**
  * Props for the MachineMarketplace component
@@ -57,44 +58,72 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
   const [connectingToMachine, setConnectingToMachine] = useState<string | null>(null);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [operators, setOperators] = useState<{ [id: string]: string }>({});
+  const [realtimeManager] = useState(() => new RealtimeManager());
 
-  // Load machines and operators from Firebase
+  // Set up real-time listeners for machines and operators
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        setConnectionError(null);
+    setIsLoading(true);
+    setConnectionError(null);
 
-        // Load machines and operators in parallel
-        const [machinesResult, operatorsResult] = await Promise.all([
-          getMachines({
-            categoryFilter: selectedCategory === 'all' ? undefined : selectedCategory,
-            statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
-            availableOnly: showAvailableOnly,
-            searchQuery: searchQuery || undefined,
-            sortBy: 'newest',
-            limitCount: 50
-          }),
-          getOperators({ limitCount: 200 })
-        ]);
+    // Clean up previous listeners
+    realtimeManager.cleanup();
 
-        setMachines(machinesResult.machines);
+    // Subscribe to real-time machines
+    const machinesUnsubscribe = subscribeToMachines(
+      {
+        categoryFilter: selectedCategory === 'all' ? undefined : selectedCategory,
+        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+        availableOnly: showAvailableOnly,
+        limitCount: 50
+      },
+      (machines, error) => {
+        if (error) {
+          setConnectionError(error.message);
+          setIsLoading(false);
+          return;
+        }
+
+        // Apply client-side search filter
+        let filteredMachines = machines;
+        if (searchQuery && searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          filteredMachines = machines.filter(machine =>
+            machine.name.toLowerCase().includes(query) ||
+            machine.description.toLowerCase().includes(query) ||
+            machine.tags.some(tag => tag.toLowerCase().includes(query))
+          );
+        }
+
+        setMachines(filteredMachines);
+        setIsLoading(false);
+      }
+    );
+
+    // Subscribe to operators for name mapping
+    const operatorsUnsubscribe = subscribeToOperators(
+      { limitCount: 200 },
+      (operators, error) => {
+        if (error) {
+          console.error('Failed to load operators:', error);
+          return;
+        }
 
         // Create operator ID to handle mapping
         const operatorMap: { [id: string]: string } = {};
-        operatorsResult.operators.forEach(op => {
+        operators.forEach(op => {
           operatorMap[op.id] = op.handle;
         });
         setOperators(operatorMap);
-
-        setIsLoading(false);
-      } catch (error) {
-        setConnectionError(error instanceof Error ? error.message : 'Failed to load marketplace data');
-        setIsLoading(false);
       }
-    };
+    );
 
-    loadData();
+    realtimeManager.addListener(machinesUnsubscribe);
+    realtimeManager.addListener(operatorsUnsubscribe);
+
+    // Cleanup on unmount
+    return () => {
+      realtimeManager.cleanup();
+    };
   }, [selectedCategory, selectedStatus, showAvailableOnly, searchQuery]);
 
   // Firebase already handles filtering
@@ -113,18 +142,8 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
       // TODO: Get actual operator ID from context/auth
       const demoOperatorId = 'demo-operator-id';
 
+      // Connect to machine - realtime listener will automatically update the UI
       await connectOperatorToMachine(machineId, demoOperatorId);
-
-      // Refresh machines to show updated connection
-      const machinesResult = await getMachines({
-        categoryFilter: selectedCategory === 'all' ? undefined : selectedCategory,
-        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
-        availableOnly: showAvailableOnly,
-        searchQuery: searchQuery || undefined,
-        sortBy: 'newest',
-        limitCount: 50
-      });
-      setMachines(machinesResult.machines);
 
       onConnectToMachine(machineId);
     } catch (error) {

@@ -32,6 +32,7 @@ import {
   filterOperationsBySkills
 } from '../types/operation';
 import { getOperations, claimOperation, startOperation, submitOperation } from '../lib/firebase/operations';
+import { subscribeToOperations, RealtimeManager } from '../lib/firebase/realtime';
 import { OperatorProfile } from '../types/operator';
 import { useXPSystem } from '../hooks/useXPSystem';
 import { useOperatorProfile } from '../hooks/useOperatorProfile';
@@ -79,34 +80,55 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   const [lastReward, setLastReward] = useState<any>(null);
   const [operations, setOperations] = useState<Operation[]>([]);
   const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [realtimeManager] = useState(() => new RealtimeManager());
 
   // XP System integration
   const { calculateXPReward, awardXP, isAwarding } = useXPSystem();
   const { updateProfile } = useOperatorProfile(profile.walletAddress);
 
-  // Load operations from Firebase
+  // Set up real-time listeners for operations
   useEffect(() => {
-    const loadOperations = async () => {
-      try {
-        setIsLoading(true);
-        setLoadingError(null);
+    setIsLoading(true);
+    setLoadingError(null);
 
-        const result = await getOperations({
-          statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
-          searchQuery: searchQuery || undefined,
-          sortBy: 'newest',
-          limitCount: 50
-        });
+    // Clean up previous listeners
+    realtimeManager.cleanup();
 
-        setOperations(result.operations);
-        setIsLoading(false);
-      } catch (error) {
-        setLoadingError(error instanceof Error ? error.message : 'Failed to load operations');
+    // Subscribe to real-time operations
+    const unsubscribe = subscribeToOperations(
+      {
+        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
+        limitCount: 50
+      },
+      (operations, error) => {
+        if (error) {
+          setLoadingError(error.message);
+          setIsLoading(false);
+          return;
+        }
+
+        // Apply client-side search filter
+        let filteredOps = operations;
+        if (searchQuery && searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          filteredOps = operations.filter(op =>
+            op.title.toLowerCase().includes(query) ||
+            op.description.toLowerCase().includes(query) ||
+            op.tags.some(tag => tag.toLowerCase().includes(query))
+          );
+        }
+
+        setOperations(filteredOps);
         setIsLoading(false);
       }
-    };
+    );
 
-    loadOperations();
+    realtimeManager.addListener(unsubscribe);
+
+    // Cleanup on unmount
+    return () => {
+      realtimeManager.cleanup();
+    };
   }, [selectedStatus, searchQuery]);
 
   /**
@@ -142,18 +164,8 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
     setAcceptingOperation(operationId);
 
     try {
-      // Claim the operation
+      // Claim the operation - realtime listener will automatically update the UI
       await claimOperation(operationId, profile.id);
-
-      // Reload operations to show updated status
-      const result = await getOperations({
-        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
-        searchQuery: searchQuery || undefined,
-        sortBy: 'newest',
-        limitCount: 50
-      });
-      setOperations(result.operations);
-
       console.log(`Operation ${operationId} accepted by ${profile.handle}`);
     } catch (error) {
       console.error('Failed to accept operation:', error);
@@ -175,7 +187,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
     setCompletingOperation(operationId);
 
     try {
-      // Submit operation for verification
+      // Submit operation for verification - realtime listener will automatically update the UI
       await submitOperation(operationId, profile.id);
 
       // Award XP and tokens
@@ -183,15 +195,6 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
 
       setLastReward(reward);
       setShowRewardModal(true);
-
-      // Reload operations to show updated status
-      const result = await getOperations({
-        statusFilter: selectedStatus === 'all' ? undefined : selectedStatus,
-        searchQuery: searchQuery || undefined,
-        sortBy: 'newest',
-        limitCount: 50
-      });
-      setOperations(result.operations);
 
       // Call parent callback
       onCompleteOperation(operationId);

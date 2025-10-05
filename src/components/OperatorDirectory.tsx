@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { OperatorProfile, SKILL_TAGS, SkillTag, OperatorRank } from '../types/operator';
 import { getOperators } from '../lib/firebase/operators';
+import { subscribeToOperators, RealtimeManager } from '../lib/firebase/realtime';
 
 /**
  * Props for the OperatorDirectory component
@@ -46,6 +47,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [operators, setOperators] = useState<OperatorProfile[]>([]);
+  const [realtimeManager] = useState(() => new RealtimeManager());
 
   // Debounce search query
   React.useEffect(() => {
@@ -55,30 +57,58 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Load operators from Firebase
+  // Set up real-time listeners for operators
   useEffect(() => {
-    const loadOperators = async () => {
-      try {
-        setIsLoading(true);
-        setNetworkError(null);
+    setIsLoading(true);
+    setNetworkError(null);
 
-        const result = await getOperators({
-          skillFilter: selectedSkill === 'all' ? undefined : selectedSkill,
-          rankFilter: selectedRank === 'all' ? undefined : selectedRank,
-          searchQuery: debouncedSearchQuery || undefined,
-          sortBy,
-          limitCount: 50
-        });
+    // Clean up previous listeners
+    realtimeManager.cleanup();
 
-        setOperators(result.operators);
-        setIsLoading(false);
-      } catch (error) {
-        setNetworkError(error instanceof Error ? error.message : 'Failed to load operators');
+    // Subscribe to real-time operators
+    const unsubscribe = subscribeToOperators(
+      {
+        skillFilter: selectedSkill === 'all' ? undefined : selectedSkill,
+        rankFilter: selectedRank === 'all' ? undefined : selectedRank,
+        limitCount: 50
+      },
+      (operators, error) => {
+        if (error) {
+          setNetworkError(error.message);
+          setIsLoading(false);
+          return;
+        }
+
+        // Apply client-side search filter and sorting
+        let filteredOps = operators;
+
+        // Search filter
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+          const query = debouncedSearchQuery.toLowerCase();
+          filteredOps = operators.filter(op =>
+            op.handle.toLowerCase().includes(query)
+          );
+        }
+
+        // Client-side sorting for specific sort options
+        if (sortBy === 'alphabetical') {
+          filteredOps.sort((a, b) => a.handle.localeCompare(b.handle));
+        } else if (sortBy === 'xp') {
+          filteredOps.sort((a, b) => b.xp - a.xp);
+        }
+        // 'newest' sorting is handled by Firebase query (lastActive desc)
+
+        setOperators(filteredOps);
         setIsLoading(false);
       }
-    };
+    );
 
-    loadOperators();
+    realtimeManager.addListener(unsubscribe);
+
+    // Cleanup on unmount
+    return () => {
+      realtimeManager.cleanup();
+    };
   }, [selectedSkill, selectedRank, debouncedSearchQuery, sortBy]);
 
   // Firebase already handles filtering and sorting

@@ -64,11 +64,11 @@ Both layers will plug into the Operator App through APIs and smart contract inte
 ---
 
 ## Technical Architecture (MVP)
-**Frontend:** Next.js + Tailwind  
-**Backend:** Firebase (Firestore + Auth) or Supabase  
-**Auth:** Wallet connect (MetaMask / WalletConnect)  
-**Storage:** JSON-based Operator registry (upgradeable to on-chain)  
-**Future:** Smart contract layer for XP, rewards, and treasury routing.
+**Frontend:** Vite + React + TypeScript + Tailwind
+**Backend:** Firebase (Firestore + Auth + Cloud Functions)
+**Auth:** Solana wallet connect (Phantom, Solflare, Backpack)
+**Storage:** Firestore for metadata, Solana for core registry
+**Future:** Full on-chain migration with smart contract layer for XP, rewards, and treasury routing.
 
 ---
 

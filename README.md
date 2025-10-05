@@ -67,9 +67,11 @@ Visit `http://localhost:5173` to explore the network.
 - **Metaplex** - NFT standards for operator badges
 
 ### Backend
-- **Supabase** - Real-time PostgreSQL database
-- **Row Level Security** - Wallet-based data isolation
-- **Real-time subscriptions** - Live updates
+- **Firebase** - Real-time NoSQL database
+- **Firestore** - Scalable document database with offline support
+- **Firebase Auth** - Custom wallet authentication
+- **Security Rules** - Declarative access control
+- **Cloud Functions** - Serverless backend logic
 
 ## 🎯 Key Features
 

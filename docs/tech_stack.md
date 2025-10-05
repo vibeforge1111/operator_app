@@ -55,10 +55,11 @@
 ```
 
 ### Off-Chain Infrastructure
-- **Supabase** - PostgreSQL + Real-time + Auth
-  - Row Level Security (RLS) for data isolation
-  - Real-time subscriptions for live updates
-  - Built-in auth with wallet signatures
+- **Firebase** - NoSQL + Real-time + Auth
+  - Firestore real-time database with offline support
+  - Firebase Auth with custom wallet authentication
+  - Built-in security rules for data isolation
+  - Cloud Functions for serverless backend logic
 - **Shadow Drive** or **Arweave** - Solana-native permanent storage
 - **Helius** or **Shyft** - Solana RPC with webhooks and indexing
 - **DAS API** - Compressed NFT metadata
@@ -107,25 +108,40 @@ pub struct Operator {
 // PDA seeds: ["operator", wallet_pubkey]
 ```
 
-### Off-Chain Extended Profile
+### Firebase Firestore Structure
 ```typescript
+// Collection: operators
 interface OperatorProfile {
   // From blockchain
   walletAddress: string;
   handle: string;
   xp: number;
 
-  // Off-chain metadata
+  // Firestore metadata
   skills: SkillTag[];
   bio?: string;
   machines: MachineConnection[];
   activeOps: Operation[];
   socials?: SocialLinks;
 
-  // Timestamps
-  createdAt: Date;
-  updatedAt: Date;
-  lastActive: Date;
+  // Timestamps (Firestore serverTimestamp)
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+  lastActive: FirebaseFirestore.Timestamp;
+}
+
+// Collection: machines
+interface Machine {
+  id: string;
+  name: string;
+  category: string;
+  operators: string[]; // Array of operator wallet addresses
+  metrics: {
+    revenue: number;
+    users: number;
+    uptime: number;
+  };
+  createdAt: FirebaseFirestore.Timestamp;
 }
 ```
 
@@ -175,9 +191,10 @@ forge test
 
 ### Infrastructure
 - **Vercel** - Frontend hosting (excellent Vite support)
+- **Firebase Hosting** - Alternative hosting with Firebase integration
 - **Helius/QuickNode** - Solana RPC with GenesysGo fallback
 - **Cloudflare** - DDoS protection, CDN
-- **AWS KMS** - Secure key management for treasury
+- **Firebase Security Rules** - Database access control
 
 ## Cost Optimization
 - **Solana advantages**: $0.00025 per tx, no gas wars
@@ -194,5 +211,13 @@ forge test
 2. **Solana**: Sub-second finality, $0.00025 transactions
 3. **Anchor Framework**: Type-safe programs with built-in security
 4. **Hybrid Storage**: Balances decentralization with UX
-5. **Supabase + Shadow Drive**: Real-time updates + permanent storage
+5. **Firebase + Shadow Drive**: Real-time NoSQL + permanent storage
 6. **Progressive Decentralization**: Start practical, evolve to fully decentralized
+
+### Firebase Advantages
+- **Real-time Database**: Instant updates across all clients
+- **Offline Support**: Continue working without internet
+- **Security Rules**: Declarative access control
+- **Cloud Functions**: Serverless backend logic
+- **Easy Scaling**: Automatic scaling with pay-per-use
+- **Google Integration**: Analytics, hosting, CDN included

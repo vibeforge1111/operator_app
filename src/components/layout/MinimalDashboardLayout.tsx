@@ -17,12 +17,18 @@ interface MinimalDashboardLayoutProps {
   profile: OperatorProfile;
   onConnectWallet: () => void;
   demoMode: boolean;
+  onNavigate?: (view: string) => void;
+  authenticated?: boolean;
+  walletAddress?: string | null;
 }
 
 export function MinimalDashboardLayout({
   profile,
   onConnectWallet,
-  demoMode
+  demoMode,
+  onNavigate,
+  authenticated,
+  walletAddress
 }: MinimalDashboardLayoutProps) {
   const [currentView, setCurrentView] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -92,7 +98,15 @@ export function MinimalDashboardLayout({
   return (
     <div className="min-h-screen bg-[var(--background)]">
       {/* Collapsible Sidebar */}
-      <CollapsibleSidebar currentView={currentView} onViewChange={setCurrentView} />
+      <CollapsibleSidebar
+        currentView={currentView}
+        onViewChange={(view) => {
+          setCurrentView(view);
+          if (onNavigate) {
+            onNavigate(view);
+          }
+        }}
+      />
 
       {/* Fixed Top Bar */}
       <MinimalTopBar

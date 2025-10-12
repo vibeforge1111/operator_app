@@ -25,8 +25,9 @@ import {
   serverTimestamp,
   writeBatch
 } from 'firebase/firestore';
-import { db } from './config';
-import { OperatorProfile, OperatorRegistration, OperatorProfileSchema } from '../../types/operator';
+import { db, USE_MOCK_DATA } from './config';
+import { OperatorProfile, OperatorRegistration } from '../../types/operator';
+import { OperatorProfileSchema } from '../validation/schemas';
 import { MOCK_OPERATORS } from '../../data/mockOperators';
 
 // Collection reference
@@ -38,6 +39,12 @@ const operatorsRef = collection(db, OPERATORS_COLLECTION);
  * Only runs if the collection is empty
  */
 export async function seedOperators(): Promise<void> {
+  // Skip seeding in mock data mode
+  if (USE_MOCK_DATA) {
+    console.log('🎭 Mock data mode - skipping Firebase seeding');
+    return;
+  }
+
   try {
     // Check if operators already exist
     const existingOperators = await getDocs(query(operatorsRef, limit(1)));
@@ -87,6 +94,67 @@ export async function getOperators(options: {
   lastDoc?: DocumentSnapshot;
   hasMore: boolean;
 }> {
+  // Use mock data if Firebase is not configured
+  if (USE_MOCK_DATA) {
+    const {
+      skillFilter,
+      rankFilter,
+      searchQuery,
+      sortBy = 'newest',
+      limitCount = 20,
+    } = options;
+
+    let filteredOperators = [...MOCK_OPERATORS];
+
+    // Apply filters
+    if (skillFilter && skillFilter !== 'all') {
+      filteredOperators = filteredOperators.filter(op =>
+        op.skills.includes(skillFilter as any)
+      );
+    }
+
+    if (rankFilter && rankFilter !== 'all') {
+      filteredOperators = filteredOperators.filter(op =>
+        op.rank === rankFilter
+      );
+    }
+
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredOperators = filteredOperators.filter(op =>
+        op.handle.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'alphabetical':
+        filteredOperators.sort((a, b) => a.handle.localeCompare(b.handle));
+        break;
+      case 'xp':
+        filteredOperators.sort((a, b) => b.xp - a.xp);
+        break;
+      case 'newest':
+      default:
+        // Mock data doesn't have real timestamps, so we'll keep original order
+        break;
+    }
+
+    // Apply pagination
+    const paginatedOperators = filteredOperators.slice(0, limitCount);
+
+    return {
+      operators: paginatedOperators.map((op, index) => ({
+        ...op,
+        id: `mock-${index}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastActive: new Date()
+      })),
+      hasMore: filteredOperators.length > limitCount
+    };
+  }
+
   try {
     const {
       skillFilter,

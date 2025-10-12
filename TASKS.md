@@ -34,6 +34,7 @@ Building a comprehensive decentralized operator network platform where operators
 - [x] **Solana Wallet** - Connection and transaction capabilities
 - [x] **XP System** - Experience points and progression tracking
 - [x] **Token Rewards** - Basic reward distribution system
+- [x] **Privy Setup** - Multi-chain authentication with embedded wallets
 
 ### Real-time Features & Live Updates
 - [x] **Firebase Realtime Listeners** - Live data synchronization with automatic updates
@@ -47,11 +48,30 @@ Building a comprehensive decentralized operator network platform where operators
 
 ## 🚧 **IN PROGRESS**
 
-*Nothing currently in progress*
+### Authentication & Wallet Integration
+- [ ] **Privy Integration** - Web2/Web3 authentication with auto wallet creation
+  - [x] Install Privy SDK and dependencies
+  - [x] Configure Privy for BNB Chain and Solana
+  - [ ] Complete integration with operator registration
+  - [ ] Test auto wallet creation flow
 
 ---
 
 ## 📋 **TODO - HIGH PRIORITY**
+
+### Blockchain Architecture (Revised)
+- [ ] **Smart Contracts (Minimal Approach)**
+  - [ ] Simple payment distribution contract for BNB Chain
+  - [ ] Escrow and reward claiming functionality
+  - [ ] Treasury management for platform fees
+- [ ] **Oracle Integration (Phase 2)**
+  - [ ] XP verification checkpoints
+  - [ ] Operation completion verification
+  - [ ] Reputation snapshots for tier-based rewards
+- [ ] **Off-Chain Infrastructure**
+  - [ ] Keep profiles, machines, operations in Firebase
+  - [ ] Activity tracking and social features off-chain
+  - [ ] Real-time updates via Firebase listeners
 
 ### Enhanced User Experience
 - [ ] **Advanced Search & Filtering**
@@ -141,21 +161,21 @@ Building a comprehensive decentralized operator network platform where operators
 
 ## 🎯 **NEXT RECOMMENDED STEPS**
 
-1. **Real-time Features** - Add Firebase realtime listeners for live updates
-2. **Notification System** - Implement in-app notifications
-3. **Analytics Dashboard** - Add interactive charts and visualizations
-4. **Mobile Optimization** - Ensure responsive design across all components
-5. **Performance Optimization** - Improve loading times and user experience
+1. **Complete Privy Integration** - Finish auth system with auto wallet creation
+2. **Build Payment Smart Contract** - Simple escrow and distribution for BNB Chain
+3. **Enhance Firebase Features** - Complete operator/machine/operations system
+4. **Add Analytics Dashboard** - Interactive charts and visualizations
+5. **Mobile Optimization** - Ensure responsive design across all components
 
 ---
 
 ## 📝 **NOTES**
 
-- **Current Status**: Fully functional Firebase-powered application
-- **Tech Stack**: React + TypeScript + Tailwind + Firebase + Solana
-- **Architecture**: Service-oriented with clear separation of concerns
-- **Data Flow**: Components → Firebase Services → Firestore
-- **Authentication**: Currently using demo users, auth system deferred
+- **Current Status**: Firebase backend + Privy auth integration in progress
+- **Tech Stack**: React + TypeScript + Tailwind + Firebase + Privy + BNB Chain/Solana
+- **Architecture**: Hybrid model - Firebase for data, blockchain for payments
+- **Data Flow**: Components → Firebase Services → Firestore (+ Smart Contracts for payments)
+- **Authentication**: Privy with embedded wallets (auto-creation for BNB Chain & Solana)
 
 ---
 

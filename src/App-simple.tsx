@@ -1,45 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { PrivyProvider } from './contexts/PrivyProvider';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { MinimalDashboardLayout } from './components/layout/MinimalDashboardLayout';
-import OperatorDashboard from './components/OperatorDashboard';
 import OperatorDirectory from './components/OperatorDirectory';
 import MachineMarketplace from './components/MachineMarketplace';
 import OperationBoard from './components/OperationBoard';
 import NotificationSystem from './components/NotificationSystem';
 import { OperatorProfile } from './types/operator';
+import { useOperatorProfile } from './hooks/useOperatorProfile';
 
-/**
- * Main Application Component
- *
- * Core application orchestrator that manages routing between different
- * views of the Operator Network. Handles wallet connection state,
- * view transitions, and provides a unified navigation system.
- *
- * Features:
- * - Multi-view routing (home, dashboard, directory, machines)
- * - Mock wallet connection for demo purposes
- * - Operator profile integration
- * - Machine connection handling
- * - Responsive view transitions
- *
- * Views:
- * - Home: Wallet connection and onboarding
- * - Dashboard: Personal operator command center
- * - Directory: Network operator discovery
- * - Machines: Machine marketplace and connections
- *
- * @component
- * @returns {JSX.Element} The main application interface
- *
- * @example
- * ```tsx
- * <App />
- * ```
- */
-function App() {
+function AppContent() {
+  const { ready, authenticated, user, login, logout } = usePrivy();
+  const { wallets } = useWallets();
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'directory' | 'machines' | 'operations'>('dashboard');
-  const [demoMode, setDemoMode] = useState(true);
+  const [primaryWalletAddress, setPrimaryWalletAddress] = useState<string | null>(null);
+  const { profile: realProfile, loading } = useOperatorProfile(primaryWalletAddress);
 
-  // Demo operator profile for showcasing the platform
+  // Get the primary wallet address (prefer BNB Chain wallet)
+  useEffect(() => {
+    if (authenticated && wallets.length > 0) {
+      const evmWallet = wallets.find(w => w.chainType === 'ethereum');
+      const solanaWallet = wallets.find(w => w.chainType === 'solana');
+      setPrimaryWalletAddress(evmWallet?.address || solanaWallet?.address || null);
+    }
+  }, [authenticated, wallets]);
+
+  // Demo profile for non-authenticated users
   const demoProfile: OperatorProfile = {
     id: 'demo_operator',
     walletAddress: 'Demo Mode - Connect Wallet to Upgrade',
@@ -54,51 +40,58 @@ function App() {
     lastActive: new Date(),
   };
 
-  /**
-   * Handles wallet connection upgrade
-   */
+  // Use real profile if available, otherwise demo
+  const currentProfile = authenticated && realProfile ? realProfile : demoProfile;
+  const demoMode = !authenticated;
+
   const handleConnectWallet = () => {
-    // This will open wallet connection modal when implemented
-    alert('Wallet connection will be available soon! For now, enjoy exploring the demo.');
+    if (!authenticated) {
+      login(); // Open Privy login modal
+    } else {
+      logout(); // Disconnect wallet
+    }
   };
 
-  /**
-   * Switch to demo wallet view
-   */
-  const handleViewWalletOptions = () => {
-    setCurrentView('home');
-  };
-
-  /**
-   * Handles machine connection requests
-   *
-   * Processes operator connections to machines and provides user feedback.
-   * In production, this would update the backend and blockchain state.
-   *
-   * @param {string} machineId - The ID of the machine to connect to
-   */
   const handleConnectToMachine = (machineId: string) => {
-    // In production, this would update the backend
     console.log(`Connecting to machine: ${machineId}`);
-    // Show success message and redirect to dashboard
     alert(`Successfully connected to machine!`);
     setCurrentView('dashboard');
   };
 
-  /**
-   * Handles operation completion with XP and token rewards
-   *
-   * Processes operator completion of operations, awards XP/tokens,
-   * and updates their profile with new rank progression.
-   *
-   * @param {string} operationId - The ID of the operation to complete
-   */
   const handleCompleteOperation = (operationId: string) => {
-    // This will be handled by the OperationBoard component
-    // with full XP calculation and reward distribution
     console.log(`Completing operation: ${operationId}`);
   };
 
+  // Navigation handling from MinimalDashboardLayout
+  const handleNavigation = (view: string) => {
+    switch(view) {
+      case 'directory':
+        setCurrentView('directory');
+        break;
+      case 'machines':
+        setCurrentView('machines');
+        break;
+      case 'operations':
+        setCurrentView('operations');
+        break;
+      default:
+        setCurrentView('dashboard');
+    }
+  };
+
+  // Show loading state while Privy initializes
+  if (!ready) {
+    return (
+      <div className="min-h-screen terminal-bg flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-[var(--color-primary)]">Initializing...</div>
+          <div className="animate-pulse">Connecting to network...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render different views based on currentView
   if (currentView === 'directory') {
     return (
       <>
@@ -120,49 +113,11 @@ function App() {
     );
   }
 
-  // Wallet connection view (for future implementation)
-  if (currentView === 'home') {
-    return (
-      <div className="min-h-screen terminal-bg flex items-center justify-center">
-        <div className="max-w-md mx-auto px-6 py-8 space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)]">
-              OPERATOR NETWORK
-            </h1>
-            <p className="text-[var(--color-text-muted)]">
-              Wallet connection will be available soon. For now, explore the demo!
-            </p>
-          </div>
-
-          <div className="operator-card rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-medium text-[var(--color-primary)]">
-              Coming Soon: Wallet Integration
-            </h3>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Connect your Solana wallet to create a real operator profile, earn XP, and participate in the network.
-            </p>
-            <button
-              onClick={() => setCurrentView('dashboard')}
-              className="w-full px-4 py-2 bg-[var(--color-primary)] text-black rounded hover:bg-[var(--color-primary)]/80 transition-colors"
-            >
-              Continue with Demo
-            </button>
-          </div>
-
-          <div className="text-center text-xs text-[var(--color-text-muted)] space-y-1">
-            <div>tick... tick... tick...</div>
-            <div className="text-[var(--color-primary)]">Network heartbeat active</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (currentView === 'operations') {
     return (
       <>
         <OperationBoard
-          profile={demoProfile}
+          profile={currentProfile}
           onBack={() => setCurrentView('dashboard')}
           onCompleteOperation={handleCompleteOperation}
         />
@@ -171,21 +126,28 @@ function App() {
     );
   }
 
-  if (currentView === 'dashboard') {
-    return (
-      <>
-        <MinimalDashboardLayout
-          profile={demoProfile}
-          onConnectWallet={handleConnectWallet}
-          demoMode={demoMode}
-        />
-        <NotificationSystem />
-      </>
-    );
-  }
+  // Default view - Dashboard with Privy integration
+  return (
+    <>
+      <MinimalDashboardLayout
+        profile={currentProfile}
+        onConnectWallet={handleConnectWallet}
+        demoMode={demoMode}
+        onNavigate={handleNavigation}
+        authenticated={authenticated}
+        walletAddress={primaryWalletAddress}
+      />
+      <NotificationSystem />
+    </>
+  );
+}
 
-  // Default fallback - shouldn't reach here
-  return null;
+function App() {
+  return (
+    <PrivyProvider>
+      <AppContent />
+    </PrivyProvider>
+  );
 }
 
 export default App;

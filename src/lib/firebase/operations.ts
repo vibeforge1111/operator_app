@@ -25,7 +25,7 @@ import {
   serverTimestamp,
   writeBatch
 } from 'firebase/firestore';
-import { db } from './config';
+import { db, USE_MOCK_DATA } from './config';
 import { Operation, OperationSchema, OperationStatus } from '../../lib/validation/schemas';
 import { MOCK_OPERATIONS } from '../../data/mockOperations';
 
@@ -38,6 +38,12 @@ const operationsRef = collection(db, OPERATIONS_COLLECTION);
  * Only runs if the collection is empty
  */
 export async function seedOperations(): Promise<void> {
+  // Skip seeding in mock data mode
+  if (USE_MOCK_DATA) {
+    console.log('🎭 Mock data mode - skipping Firebase seeding');
+    return;
+  }
+
   try {
     // Check if operations already exist
     const existingOperations = await getDocs(query(operationsRef, limit(1)));

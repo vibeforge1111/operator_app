@@ -33,9 +33,14 @@ import { SKILL_TAGS, SKILL_DESCRIPTIONS, SkillTag } from '../types/operator';
  * <OperatorRegistration />
  * ```
  */
-export default function OperatorRegistration() {
+interface OperatorRegistrationProps {
+  walletAddress?: string;
+}
+
+export default function OperatorRegistration({ walletAddress }: OperatorRegistrationProps) {
   const { publicKey } = useWallet();
-  const { createProfile } = useOperatorProfile(publicKey?.toString());
+  const address = walletAddress || publicKey?.toString();
+  const { createProfile } = useOperatorProfile(address);
 
   const [handle, setHandle] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<SkillTag[]>([]);

@@ -54,11 +54,12 @@ export const HandleSchema = z.string()
 /**
  * Solana wallet address validation
  *
- * Validates base58 encoded public keys (44 characters)
+ * Validates base58 encoded public keys (32-44 characters)
  * Used for wallet addresses and PDA derivation
  */
 export const WalletAddressSchema = z.string()
-  .length(44, 'Invalid wallet address length')
+  .min(32, 'Wallet address too short')
+  .max(44, 'Wallet address too long')
   .regex(/^[1-9A-HJ-NP-Za-km-z]+$/, 'Invalid base58 encoding');
 
 /**
@@ -82,6 +83,7 @@ export type OperatorRegistration = z.infer<typeof OperatorRegistrationSchema>;
  *
  * Represents the full operator data structure.
  * Used for database validation and API responses.
+ * Handles both Date objects and Firestore Timestamps.
  */
 export const OperatorProfileSchema = z.object({
   id: z.string().min(1),
@@ -93,9 +95,43 @@ export const OperatorProfileSchema = z.object({
   connectedMachines: z.number().int().min(0),
   activeOps: z.number().int().min(0),
   bio: z.string().max(500).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  lastActive: z.date()
+  // Handle Firestore Timestamps and Date objects
+  createdAt: z.union([
+    z.date(),
+    z.object({ seconds: z.number(), nanoseconds: z.number() }),
+    z.null()
+  ]).transform(val => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'object' && 'seconds' in val) {
+      return new Date(val.seconds * 1000);
+    }
+    return new Date();
+  }),
+  updatedAt: z.union([
+    z.date(),
+    z.object({ seconds: z.number(), nanoseconds: z.number() }),
+    z.null()
+  ]).transform(val => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'object' && 'seconds' in val) {
+      return new Date(val.seconds * 1000);
+    }
+    return new Date();
+  }),
+  lastActive: z.union([
+    z.date(),
+    z.object({ seconds: z.number(), nanoseconds: z.number() }),
+    z.null()
+  ]).transform(val => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'object' && 'seconds' in val) {
+      return new Date(val.seconds * 1000);
+    }
+    return new Date();
+  })
 });
 
 export type OperatorProfile = z.infer<typeof OperatorProfileSchema>;
@@ -165,6 +201,7 @@ export const MachineEarningsSchema = z.object({
  *
  * Represents a Machine of Production in the network.
  * Used for marketplace listings and connections.
+ * Handles both Date objects and Firestore Timestamps.
  */
 export const MachineSchema = z.object({
   id: z.string().min(1),
@@ -180,8 +217,31 @@ export const MachineSchema = z.object({
   imageUrl: z.string().url().optional(),
   repositoryUrl: z.string().url().optional(),
   liveUrl: z.string().url().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+  // Handle Firestore Timestamps and Date objects
+  createdAt: z.union([
+    z.date(),
+    z.object({ seconds: z.number(), nanoseconds: z.number() }),
+    z.null()
+  ]).transform(val => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'object' && 'seconds' in val) {
+      return new Date(val.seconds * 1000);
+    }
+    return new Date();
+  }),
+  updatedAt: z.union([
+    z.date(),
+    z.object({ seconds: z.number(), nanoseconds: z.number() }),
+    z.null()
+  ]).transform(val => {
+    if (!val) return new Date();
+    if (val instanceof Date) return val;
+    if (typeof val === 'object' && 'seconds' in val) {
+      return new Date(val.seconds * 1000);
+    }
+    return new Date();
+  })
 });
 
 export type Machine = z.infer<typeof MachineSchema>;

@@ -27,7 +27,7 @@ import {
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore';
-import { db } from './config';
+import { db, USE_MOCK_DATA } from './config';
 import { Machine, MachineSchema } from '../../lib/validation/schemas';
 import { MOCK_MACHINES } from '../../data/mockMachines';
 
@@ -40,6 +40,12 @@ const machinesRef = collection(db, MACHINES_COLLECTION);
  * Only runs if the collection is empty
  */
 export async function seedMachines(): Promise<void> {
+  // Skip seeding in mock data mode
+  if (USE_MOCK_DATA) {
+    console.log('🎭 Mock data mode - skipping Firebase seeding');
+    return;
+  }
+
   try {
     // Check if machines already exist
     const existingMachines = await getDocs(query(machinesRef, limit(1)));

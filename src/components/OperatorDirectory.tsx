@@ -441,49 +441,56 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             </InteractiveButton>
           </EnhancedCard>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredOperators.map((operator, index) => (
               <div
                 key={operator.id}
-                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-primary)]/20 rounded-lg hover:border-[var(--color-primary)]/40 transition-all duration-200"
+                className="flex items-center gap-4 p-4 bg-[var(--card)] border border-[var(--border)] rounded-lg hover:border-[var(--foreground)]/20 transition-all duration-200"
               >
                 {/* Profile Picture */}
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg">
-                    {operator.handle.charAt(0).toUpperCase()}
+                  <div className="w-10 h-10 rounded-full bg-[var(--muted)] flex items-center justify-center">
+                    <span className="text-sm font-medium text-[var(--muted-foreground)]">
+                      {operator.handle.charAt(0).toUpperCase()}
+                    </span>
                   </div>
                 </div>
 
                 {/* Operator Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-sm font-bold text-white">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-medium text-[var(--foreground)]">
                       {operator.handle}
                     </h3>
-                    <span className="text-xs text-[var(--color-primary)] border border-[var(--color-primary)] px-2 py-0.5 rounded">{operator.xp} XP</span>
+                    <span className="text-xs text-[var(--color-primary)]/70 bg-[var(--background)] px-2 py-0.5 rounded border border-[var(--border)]">
+                      {operator.xp} XP
+                    </span>
                   </div>
-                  <div className="text-xs text-gray-300">
-                    {operator.skills.join(', ')}
+                  <div className="text-xs text-[var(--muted-foreground)]">
+                    {operator.skills.join(' · ')}
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div className="hidden sm:flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
-                  <div>
-                    <span className="font-medium text-white">{operator.completionRate || 95}%</span> completion
+                <div className="hidden sm:flex items-center gap-6 text-xs">
+                  <div className="text-[var(--muted-foreground)]">
+                    <span className="text-[var(--foreground)]">{operator.completionRate || 95}%</span>
+                    <span className="ml-1">completion</span>
                   </div>
-                  <div>
-                    <span className="font-medium text-white">{operator.connectedMachines}</span> machines
+                  <div className="text-[var(--muted-foreground)]">
+                    <span className="text-[var(--foreground)]">{operator.connectedMachines}</span>
+                    <span className="ml-1">machines</span>
                   </div>
-                  <div>
-                    <span className="font-medium text-white">{operator.activeOps}</span> ops
+                  <div className="text-[var(--muted-foreground)]">
+                    <span className="text-[var(--foreground)]">{operator.activeOps}</span>
+                    <span className="ml-1">ops</span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex-shrink-0">
                   <button
-                    className="px-4 py-1.5 text-xs bg-gray-200 text-gray-900 font-medium rounded hover:bg-gray-300 transition-colors duration-200"
+                    className="px-3 py-1.5 text-xs bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded hover:bg-[var(--muted)] transition-colors duration-200"
                   >
                     View Profile
                   </button>

@@ -612,8 +612,9 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<SkillTag | 'all'>('all');
-  const [selectedRank, setSelectedRank] = useState<OperatorRank | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'newest' | 'alphabetical' | 'xp'>('newest');
+  const [completionRateFilter, setCompletionRateFilter] = useState<'all' | '90+' | '80+' | '70+'>('all');
+  const [xpFilter, setXpFilter] = useState<'all' | '5000+' | '3000+' | '1000+'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'alphabetical' | 'xp' | 'completion' | 'machines' | 'active'>('newest');
   const [isLoading, setIsLoading] = useState(true);
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [operators, setOperators] = useState<OperatorProfile[]>([]);
@@ -648,9 +649,16 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           filteredOps = filteredOps.filter(op => op.skills.includes(selectedSkill));
         }
 
-        // Filter by rank
-        if (selectedRank !== 'all') {
-          filteredOps = filteredOps.filter(op => op.rank === selectedRank);
+        // Filter by completion rate
+        if (completionRateFilter !== 'all') {
+          const minRate = parseInt(completionRateFilter.replace('+', ''));
+          filteredOps = filteredOps.filter(op => (op.completionRate || 0) >= minRate);
+        }
+
+        // Filter by XP
+        if (xpFilter !== 'all') {
+          const minXP = parseInt(xpFilter.replace('+', ''));
+          filteredOps = filteredOps.filter(op => op.xp >= minXP);
         }
 
         // Search filter
@@ -668,6 +676,12 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           filteredOps.sort((a, b) => b.xp - a.xp);
         } else if (sortBy === 'newest') {
           filteredOps.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } else if (sortBy === 'completion') {
+          filteredOps.sort((a, b) => (b.completionRate || 0) - (a.completionRate || 0));
+        } else if (sortBy === 'machines') {
+          filteredOps.sort((a, b) => b.connectedMachines - a.connectedMachines);
+        } else if (sortBy === 'active') {
+          filteredOps.sort((a, b) => b.activeOps - a.activeOps);
         }
 
         setOperators(filteredOps);
@@ -684,7 +698,6 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
     const unsubscribe = subscribeToOperators(
       {
         skillFilter: selectedSkill === 'all' ? undefined : selectedSkill,
-        rankFilter: selectedRank === 'all' ? undefined : selectedRank,
         limitCount: 50
       },
       (operators, error) => {
@@ -697,8 +710,13 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           if (selectedSkill !== 'all') {
             filteredOps = filteredOps.filter(op => op.skills.includes(selectedSkill));
           }
-          if (selectedRank !== 'all') {
-            filteredOps = filteredOps.filter(op => op.rank === selectedRank);
+          if (completionRateFilter !== 'all') {
+            const minRate = parseInt(completionRateFilter.replace('+', ''));
+            filteredOps = filteredOps.filter(op => (op.completionRate || 0) >= minRate);
+          }
+          if (xpFilter !== 'all') {
+            const minXP = parseInt(xpFilter.replace('+', ''));
+            filteredOps = filteredOps.filter(op => op.xp >= minXP);
           }
           if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
             const query = debouncedSearchQuery.toLowerCase();
@@ -728,6 +746,12 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           filteredOps.sort((a, b) => a.handle.localeCompare(b.handle));
         } else if (sortBy === 'xp') {
           filteredOps.sort((a, b) => b.xp - a.xp);
+        } else if (sortBy === 'completion') {
+          filteredOps.sort((a, b) => (b.completionRate || 0) - (a.completionRate || 0));
+        } else if (sortBy === 'machines') {
+          filteredOps.sort((a, b) => b.connectedMachines - a.connectedMachines);
+        } else if (sortBy === 'active') {
+          filteredOps.sort((a, b) => b.activeOps - a.activeOps);
         }
         // 'newest' sorting is handled by Firebase query (lastActive desc)
 
@@ -742,7 +766,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
     return () => {
       realtimeManager.cleanup();
     };
-  }, [selectedSkill, selectedRank, debouncedSearchQuery, sortBy]);
+  }, [selectedSkill, completionRateFilter, xpFilter, debouncedSearchQuery, sortBy]);
 
   // Firebase already handles filtering and sorting
   const filteredOperators = operators;
@@ -756,7 +780,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   // Reset to page 1 when filters or items per page change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [selectedSkill, selectedRank, debouncedSearchQuery, sortBy, itemsPerPage]);
+  }, [selectedSkill, completionRateFilter, xpFilter, debouncedSearchQuery, sortBy, itemsPerPage]);
 
   // Show loading state
   if (isLoading) {
@@ -822,25 +846,19 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
         {/* Search and Filters */}
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Search</label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by handle..."
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              />
-            </div>
-
             {/* Skill Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Skill</label>
               <select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value as SkillTag | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
+                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.7rem center',
+                  backgroundSize: '1.2em 1.2em',
+                }}
               >
                 <option value="all">All Skills</option>
                 {SKILL_TAGS.map(skill => (
@@ -849,19 +867,45 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
               </select>
             </div>
 
-            {/* Rank Filter */}
+            {/* Completion Rate Filter */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Rank</label>
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Completion Rate</label>
               <select
-                value={selectedRank}
-                onChange={(e) => setSelectedRank(e.target.value as OperatorRank | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
+                value={completionRateFilter}
+                onChange={(e) => setCompletionRateFilter(e.target.value as 'all' | '90+' | '80+' | '70+')}
+                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.7rem center',
+                  backgroundSize: '1.2em 1.2em',
+                }}
               >
-                <option value="all">All Ranks</option>
-                <option value="Apprentice">Apprentice</option>
-                <option value="Operator">Operator</option>
-                <option value="Senior">Senior</option>
-                <option value="Architect">Architect</option>
+                <option value="all">All Rates</option>
+                <option value="90+">90%+ completion</option>
+                <option value="80+">80%+ completion</option>
+                <option value="70+">70%+ completion</option>
+              </select>
+            </div>
+
+            {/* XP Filter */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Experience</label>
+              <select
+                value={xpFilter}
+                onChange={(e) => setXpFilter(e.target.value as 'all' | '5000+' | '3000+' | '1000+')}
+                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.7rem center',
+                  backgroundSize: '1.2em 1.2em',
+                }}
+              >
+                <option value="all">All XP</option>
+                <option value="5000+">5000+ XP</option>
+                <option value="3000+">3000+ XP</option>
+                <option value="1000+">1000+ XP</option>
               </select>
             </div>
 
@@ -870,12 +914,21 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Sort</label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'newest' | 'alphabetical' | 'xp')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'alphabetical' | 'xp' | 'completion' | 'machines' | 'active')}
+                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.7rem center',
+                  backgroundSize: '1.2em 1.2em',
+                }}
               >
                 <option value="newest">Newest First</option>
                 <option value="alphabetical">Alphabetical</option>
                 <option value="xp">Highest XP</option>
+                <option value="completion">Highest Completion</option>
+                <option value="machines">Most Machines</option>
+                <option value="active">Most Active Ops</option>
               </select>
             </div>
           </div>
@@ -895,7 +948,13 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
                 <select
                   value={itemsPerPage}
                   onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                  className="px-2 py-1 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
+                  className="px-2 py-1 pr-8 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundSize: '1em 1em',
+                  }}
                 >
                   <option value="10">10</option>
                   <option value="25">25</option>
@@ -917,7 +976,8 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
               onClick={() => {
                 setSearchQuery('');
                 setSelectedSkill('all');
-                setSelectedRank('all');
+                setCompletionRateFilter('all');
+                setXpFilter('all');
               }}
             >
               Clear Filters

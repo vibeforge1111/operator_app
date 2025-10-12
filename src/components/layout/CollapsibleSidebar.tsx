@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Cpu, Users, Activity, Settings, ChevronRight, Sun, Moon } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
 interface CollapsibleSidebarProps {
   currentView: string;
@@ -55,11 +56,11 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
     >
       {/* Logo/Brand */}
       <div className="h-16 flex items-center px-4 border-b border-[var(--sidebar-border)]">
-        <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-          <span className="text-black font-bold text-sm">O</span>
+        <div className="w-8 h-8 flex items-center justify-center">
+          <img src={logo} alt="Operator Network" className="w-8 h-8 object-contain" />
         </div>
         {!isCollapsed && (
-          <div className="ml-3 animate-fade-in">
+          <div className="ml-2 animate-fade-in">
             <h1 className="text-lg font-medium text-[var(--sidebar-foreground)]">Operator Network</h1>
           </div>
         )}

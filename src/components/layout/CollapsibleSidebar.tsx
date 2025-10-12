@@ -60,7 +60,7 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
         </div>
         {!isCollapsed && (
           <div className="ml-3 animate-fade-in">
-            <h1 className="text-lg font-medium text-[var(--sidebar-foreground)]">Operator</h1>
+            <h1 className="text-lg font-medium text-[var(--sidebar-foreground)]">Operator Network</h1>
           </div>
         )}
       </div>

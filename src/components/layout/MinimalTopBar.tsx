@@ -33,23 +33,8 @@ export function MinimalTopBar({
       "
       style={{ left: `${sidebarWidth}px`, right: '0' }}
     >
-      {/* Left: Logo + Brand Title */}
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-            <span className="text-black font-bold text-sm">O</span>
-          </div>
-          <h1 className="text-xl font-medium text-[var(--foreground)]">
-            Operator Network
-          </h1>
-        </div>
-
-        {/* Live Status Indicator */}
-        <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-transparent border border-[var(--status-active)]">
-          <div className="w-2 h-2 rounded-full bg-[var(--status-active)] animate-subtle-pulse"></div>
-          <span className="text-xs font-medium text-[var(--foreground)]">LIVE</span>
-        </div>
-      </div>
+      {/* Left: Empty for now */}
+      <div></div>
 
       {/* Right: Controls */}
       <div className="flex items-center space-x-4">

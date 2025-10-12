@@ -12,7 +12,7 @@ import { useOperatorProfile } from './hooks/useOperatorProfile';
 function AppContent() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
-  const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'directory' | 'machines' | 'operations'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'operators' | 'machines' | 'operations'>('dashboard');
   const [primaryWalletAddress, setPrimaryWalletAddress] = useState<string | null>(null);
   const { profile: realProfile, loading } = useOperatorProfile(primaryWalletAddress);
 
@@ -65,14 +65,17 @@ function AppContent() {
   // Navigation handling from MinimalDashboardLayout
   const handleNavigation = (view: string) => {
     switch(view) {
-      case 'directory':
-        setCurrentView('directory');
+      case 'operators':
+        setCurrentView('operators');
         break;
       case 'machines':
         setCurrentView('machines');
         break;
       case 'operations':
         setCurrentView('operations');
+        break;
+      case 'dashboard':
+        setCurrentView('dashboard');
         break;
       default:
         setCurrentView('dashboard');
@@ -91,42 +94,7 @@ function AppContent() {
     );
   }
 
-  // Render different views based on currentView
-  if (currentView === 'directory') {
-    return (
-      <>
-        <OperatorDirectory onBack={() => setCurrentView('dashboard')} />
-        <NotificationSystem />
-      </>
-    );
-  }
-
-  if (currentView === 'machines') {
-    return (
-      <>
-        <MachineMarketplace
-          onBack={() => setCurrentView('dashboard')}
-          onConnectToMachine={handleConnectToMachine}
-        />
-        <NotificationSystem />
-      </>
-    );
-  }
-
-  if (currentView === 'operations') {
-    return (
-      <>
-        <OperationBoard
-          profile={currentProfile}
-          onBack={() => setCurrentView('dashboard')}
-          onCompleteOperation={handleCompleteOperation}
-        />
-        <NotificationSystem />
-      </>
-    );
-  }
-
-  // Default view - Dashboard with Privy integration
+  // All views now use the MinimalDashboardLayout with sidebar
   return (
     <>
       <MinimalDashboardLayout
@@ -136,6 +104,9 @@ function AppContent() {
         onNavigate={handleNavigation}
         authenticated={authenticated}
         walletAddress={primaryWalletAddress}
+        currentView={currentView}
+        onConnectToMachine={handleConnectToMachine}
+        onCompleteOperation={handleCompleteOperation}
       />
       <NotificationSystem />
     </>

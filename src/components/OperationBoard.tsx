@@ -261,22 +261,16 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   return (
     <div className="min-h-screen terminal-bg">
       {/* Header */}
-      <div className="border-b border-[var(--color-primary)]/20 bg-[var(--color-surface)]/50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--color-primary)]">OPERATION BOARD</h1>
-            <p className="text-sm text-[var(--color-text-muted)]">Missions and bounties for operators</p>
+      <div className="">
+        <div className="max-w-6xl mx-auto px-6 pt-6 pb-8">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Operation Board</h1>
+            <p className="text-[var(--muted-foreground)]">Missions and bounties for operators</p>
           </div>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 bg-[var(--color-surface)] text-white border border-[var(--color-primary)]/30 rounded hover:border-[var(--color-primary)]/50 transition-colors"
-          >
-            ← Back to Dashboard
-          </button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 pb-8 space-y-6">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="operator-card rounded-lg p-4 text-center">
@@ -306,44 +300,42 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
         </div>
 
         {/* Search and Filters */}
-        <div className="operator-card rounded-lg p-6">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Search Operations</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Search</label>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by title, description, or tags..."
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none"
+                placeholder="Search operations..."
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               />
             </div>
 
             {/* Category Filter */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Category</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Category</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as OperationCategory | 'all')}
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               >
                 <option value="all">All Categories</option>
                 {OPERATION_CATEGORIES.map(category => (
-                  <option key={category} value={category}>
-                    {getCategoryIcon(category)} {category}
-                  </option>
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
 
             {/* Priority Filter */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Priority</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Priority</label>
               <select
                 value={selectedPriority}
                 onChange={(e) => setSelectedPriority(e.target.value as OperationPriority | 'all')}
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               >
                 <option value="all">All Priorities</option>
                 {OPERATION_PRIORITIES.map(priority => (
@@ -353,12 +345,12 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
             </div>
 
             {/* Status Filter */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Status</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Status</label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as OperationStatus | 'all')}
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               >
                 <option value="all">All Statuses</option>
                 {OPERATION_STATUSES.map(status => (
@@ -368,26 +360,24 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
             </div>
 
             {/* Recommended Toggle */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Filters</label>
-              <div className="flex items-center space-x-2">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Filter</label>
+              <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
                 <input
                   type="checkbox"
                   id="recommended"
                   checked={showRecommended}
                   onChange={(e) => setShowRecommended(e.target.checked)}
-                  className="rounded border-[var(--color-primary)]/30"
+                  className="w-4 h-4 text-[var(--foreground)] bg-[var(--background)] border border-[var(--border)] rounded focus:ring-[var(--foreground)]"
                 />
-                <label htmlFor="recommended" className="text-sm text-white">
-                  Recommended for you
-                </label>
-              </div>
+                <span className="text-[var(--foreground)] text-sm">Recommended</span>
+              </label>
             </div>
           </div>
         </div>
 
         {/* Results Count */}
-        <div className="text-[var(--color-text-muted)] text-sm">
+        <div className="text-[var(--muted-foreground)] text-sm">
           {filteredOperations.length} operation{filteredOperations.length !== 1 ? 's' : ''} found
         </div>
 

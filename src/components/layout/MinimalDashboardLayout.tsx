@@ -20,6 +20,9 @@ interface MinimalDashboardLayoutProps {
   onNavigate?: (view: string) => void;
   authenticated?: boolean;
   walletAddress?: string | null;
+  currentView?: string;
+  onConnectToMachine?: (machineId: string) => void;
+  onCompleteOperation?: (operationId: string) => void;
 }
 
 export function MinimalDashboardLayout({
@@ -28,9 +31,19 @@ export function MinimalDashboardLayout({
   demoMode,
   onNavigate,
   authenticated,
-  walletAddress
+  walletAddress,
+  currentView: externalView,
+  onConnectToMachine,
+  onCompleteOperation
 }: MinimalDashboardLayoutProps) {
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState(externalView || 'dashboard');
+
+  // Sync with external view changes
+  useEffect(() => {
+    if (externalView) {
+      setCurrentView(externalView);
+    }
+  }, [externalView]);
   const [sidebarWidth, setSidebarWidth] = useState(256); // Default expanded width
 
   // Listen for sidebar width changes
@@ -67,9 +80,9 @@ export function MinimalDashboardLayout({
       case 'operators':
         return <OperatorDirectory onBack={() => setCurrentView('dashboard')} />;
       case 'machines':
-        return <MachineMarketplace onBack={() => setCurrentView('dashboard')} onConnectToMachine={() => {}} />;
+        return <MachineMarketplace onBack={() => setCurrentView('dashboard')} onConnectToMachine={onConnectToMachine || (() => {})} />;
       case 'operations':
-        return <OperationBoard profile={profile} onBack={() => setCurrentView('dashboard')} onCompleteOperation={() => {}} />;
+        return <OperationBoard profile={profile} onBack={() => setCurrentView('dashboard')} onCompleteOperation={onCompleteOperation || (() => {})} />;
       default:
         return <MVPDashboard profile={profile} />;
     }

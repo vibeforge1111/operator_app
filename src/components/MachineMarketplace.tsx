@@ -230,59 +230,53 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
         </div>
       )}
       {/* Header */}
-      <div className="border-b border-[var(--color-primary)]/20 bg-[var(--color-surface)]/50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold text-[var(--color-primary)]">MACHINE MARKETPLACE</h1>
-            <p className="text-sm text-[var(--color-text-muted)]">Discover and connect to Machines of Production</p>
+      <div className="">
+        <div className="max-w-6xl mx-auto px-6 pt-6 pb-8">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Machine Marketplace</h1>
+            <p className="text-[var(--muted-foreground)]">Discover and connect to Machines of Production</p>
           </div>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 bg-[var(--color-surface)] text-white border border-[var(--color-primary)]/30 rounded hover:border-[var(--color-primary)]/50 transition-colors"
-          >
-            ← Back to Dashboard
-          </button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 pb-8 space-y-6">
         {/* Filters */}
-        <div className="operator-card rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Search Machines</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Search</label>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, description, or tags..."
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white placeholder-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none"
+                placeholder="Search machines..."
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] placeholder-[var(--muted-foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               />
             </div>
 
             {/* Category Filter */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Category</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Category</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as MachineCategory | 'all')}
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               >
                 <option value="all">All Categories</option>
                 {MACHINE_CATEGORIES.map(category => (
-                  <option key={category} value={category}>{getCategoryIcon(category)} {category}</option>
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
 
             {/* Status Filter */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Status</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Status</label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as 'all' | 'Active' | 'Development')}
-                className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded text-white focus:border-[var(--color-primary)] focus:outline-none"
+                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
               >
                 <option value="all">All Status</option>
                 <option value="Active">Active</option>
@@ -291,23 +285,23 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
             </div>
 
             {/* Available Only */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-white">Availability</label>
-              <label className="flex items-center space-x-2 cursor-pointer">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-[var(--muted-foreground)]">Filter</label>
+              <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
                 <input
                   type="checkbox"
                   checked={showAvailableOnly}
                   onChange={(e) => setShowAvailableOnly(e.target.checked)}
-                  className="w-4 h-4 text-[var(--color-primary)] bg-[var(--color-bg)] border border-[var(--color-primary)]/30 rounded focus:ring-[var(--color-primary)]"
+                  className="w-4 h-4 text-[var(--foreground)] bg-[var(--background)] border border-[var(--border)] rounded focus:ring-[var(--foreground)]"
                 />
-                <span className="text-white text-sm">Available slots only</span>
+                <span className="text-[var(--foreground)] text-sm">Available only</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* Results Count */}
-        <div className="text-[var(--color-text-muted)] text-sm">
+        <div className="text-[var(--muted-foreground)] text-sm">
           {filteredMachines.length} machine{filteredMachines.length !== 1 ? 's' : ''} found
         </div>
 

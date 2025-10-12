@@ -43,6 +43,122 @@ interface OperatorDirectoryProps {
  * />
  * ```
  */
+// Dummy operators data for demo
+const DUMMY_OPERATORS: OperatorProfile[] = [
+  {
+    id: 'op_001',
+    walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
+    handle: 'cryptobuilder',
+    skills: ['Dev', 'Design'],
+    xp: 4200,
+    rank: 'Architect',
+    connectedMachines: 5,
+    activeOps: 3,
+    completionRate: 98,
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_002',
+    walletAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
+    handle: 'vibemaster',
+    skills: ['VibeOps', 'Narrative'],
+    xp: 3500,
+    rank: 'Senior',
+    connectedMachines: 4,
+    activeOps: 2,
+    completionRate: 92,
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date(),
+    lastActive: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
+  },
+  {
+    id: 'op_003',
+    walletAddress: '0x567890abcdef1234567890abcdef1234567890ab',
+    handle: 'defi_wizard',
+    skills: ['Dev', 'BizOps'],
+    xp: 5800,
+    rank: 'Architect',
+    connectedMachines: 8,
+    activeOps: 5,
+    completionRate: 99,
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date(),
+    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+  },
+  {
+    id: 'op_004',
+    walletAddress: '0x90abcdef1234567890abcdef1234567890abcdef',
+    handle: 'pixel_artist',
+    skills: ['Design', 'Narrative'],
+    xp: 2200,
+    rank: 'Operator',
+    connectedMachines: 3,
+    activeOps: 1,
+    completionRate: 88,
+    createdAt: new Date('2024-03-05'),
+    updatedAt: new Date(),
+    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+  },
+  {
+    id: 'op_005',
+    walletAddress: '0xcdef1234567890abcdef1234567890abcdef1234',
+    handle: 'coordination_pro',
+    skills: ['Coordination', 'BizOps'],
+    xp: 3800,
+    rank: 'Senior',
+    connectedMachines: 6,
+    activeOps: 4,
+    completionRate: 95,
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_006',
+    walletAddress: '0x34567890abcdef1234567890abcdef1234567890',
+    handle: 'solidity_sage',
+    skills: ['Dev'],
+    xp: 6500,
+    rank: 'Architect',
+    connectedMachines: 10,
+    activeOps: 6,
+    completionRate: 100,
+    createdAt: new Date('2023-12-15'),
+    updatedAt: new Date(),
+    lastActive: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
+  },
+  {
+    id: 'op_007',
+    walletAddress: '0xef1234567890abcdef1234567890abcdef123456',
+    handle: 'community_lead',
+    skills: ['VibeOps', 'Coordination', 'Narrative'],
+    xp: 2900,
+    rank: 'Senior',
+    connectedMachines: 4,
+    activeOps: 3,
+    completionRate: 91,
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date(),
+    lastActive: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
+  },
+  {
+    id: 'op_008',
+    walletAddress: '0x7890abcdef1234567890abcdef1234567890abcd',
+    handle: 'rookie_dev',
+    skills: ['Dev', 'Design'],
+    xp: 500,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 75,
+    createdAt: new Date('2024-03-20'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  }
+];
+
 export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -53,6 +169,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [networkError, setNetworkError] = useState<string | null>(null);
   const [operators, setOperators] = useState<OperatorProfile[]>([]);
   const [realtimeManager] = useState(() => new RealtimeManager());
+  const [useDummyData, setUseDummyData] = useState(false);
 
   // Debounce search query
   React.useEffect(() => {
@@ -67,6 +184,48 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
     setIsLoading(true);
     setNetworkError(null);
 
+    // Use dummy data for demo
+    const useMockData = true; // Set to true to always use dummy data
+
+    if (useMockData) {
+      // Apply filters and sorting to dummy data
+      setTimeout(() => {
+        let filteredOps = [...DUMMY_OPERATORS];
+
+        // Filter by skill
+        if (selectedSkill !== 'all') {
+          filteredOps = filteredOps.filter(op => op.skills.includes(selectedSkill));
+        }
+
+        // Filter by rank
+        if (selectedRank !== 'all') {
+          filteredOps = filteredOps.filter(op => op.rank === selectedRank);
+        }
+
+        // Search filter
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+          const query = debouncedSearchQuery.toLowerCase();
+          filteredOps = filteredOps.filter(op =>
+            op.handle.toLowerCase().includes(query)
+          );
+        }
+
+        // Sorting
+        if (sortBy === 'alphabetical') {
+          filteredOps.sort((a, b) => a.handle.localeCompare(b.handle));
+        } else if (sortBy === 'xp') {
+          filteredOps.sort((a, b) => b.xp - a.xp);
+        } else if (sortBy === 'newest') {
+          filteredOps.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+
+        setOperators(filteredOps);
+        setIsLoading(false);
+      }, 500); // Simulate loading
+
+      return;
+    }
+
     // Clean up previous listeners
     realtimeManager.cleanup();
 
@@ -79,7 +238,25 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
       },
       (operators, error) => {
         if (error) {
-          setNetworkError(error.message);
+          // Fall back to dummy data on error
+          setUseDummyData(true);
+          let filteredOps = [...DUMMY_OPERATORS];
+
+          // Apply filters to dummy data
+          if (selectedSkill !== 'all') {
+            filteredOps = filteredOps.filter(op => op.skills.includes(selectedSkill));
+          }
+          if (selectedRank !== 'all') {
+            filteredOps = filteredOps.filter(op => op.rank === selectedRank);
+          }
+          if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+            const query = debouncedSearchQuery.toLowerCase();
+            filteredOps = filteredOps.filter(op =>
+              op.handle.toLowerCase().includes(query)
+            );
+          }
+
+          setOperators(filteredOps);
           setIsLoading(false);
           return;
         }
@@ -278,77 +455,55 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             </InteractiveButton>
           </EnhancedCard>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOperators.map((operator) => (
-              <EnhancedCard key={operator.id} variant="elevated" hover interactive className="p-6 space-y-4 transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-[var(--color-primary)]/10 border-2 border-[var(--color-primary)]/30 hover:border-[var(--color-primary)]/60 bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface)]/80">
-                {/* Operator Header */}
-                <div className="space-y-2 relative">
-                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-[var(--color-primary)] rounded-full animate-pulse shadow-lg shadow-[var(--color-primary)]/50"></div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 bg-[var(--color-primary)] rounded-full animate-ping"></span>
-                    <span className="text-[var(--color-primary)]">@</span>{operator.handle}
-                    <span className="text-xs bg-[var(--color-primary)]/20 text-[var(--color-primary)] px-2 py-0.5 rounded-full font-normal">ONLINE</span>
-                  </h3>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <span className="text-[var(--color-primary)]">
-                      <AnimatedCounter value={operator.xp} suffix=" XP" />
-                    </span>
-                    <span className="text-[var(--color-text-muted)]">|</span>
+          <div className="space-y-3">
+            {filteredOperators.map((operator, index) => (
+              <div
+                key={operator.id}
+                className="flex items-center gap-4 p-4 bg-[var(--color-surface)] border border-[var(--color-primary)]/20 rounded-lg hover:border-[var(--color-primary)]/40 transition-all duration-200"
+              >
+                {/* Profile Picture */}
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg">
+                    {operator.handle.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+
+                {/* Operator Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-sm font-bold text-white truncate">
+                      {operator.handle}
+                    </h3>
                     <Badge variant="secondary" size="sm">{operator.rank}</Badge>
+                    <span className="text-xs text-[var(--color-primary)]">{operator.xp} XP</span>
+                  </div>
+                  <div className="text-xs text-gray-300">
+                    {operator.skills.join(', ')}
                   </div>
                 </div>
 
-                {/* Skills */}
-                <div className="space-y-2">
-                  <div className="text-sm text-[var(--color-text-muted)]">Skills:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {operator.skills.map((skill) => (
-                      <SkillBadge
-                        key={skill}
-                        skill={skill}
-                        interactive
-                        className="bg-gradient-to-r from-[var(--color-primary)]/20 to-[var(--color-secondary)]/20 border-[var(--color-primary)]/40 text-[var(--color-primary)] hover:from-[var(--color-primary)]/30 hover:to-[var(--color-secondary)]/30 hover:border-[var(--color-primary)]/60 transform hover:scale-110 shadow-lg shadow-[var(--color-primary)]/20"
-                      />
-                    ))}
+                {/* Stats */}
+                <div className="hidden sm:flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
+                  <div>
+                    <span className="font-medium text-white">{operator.completionRate || 95}%</span> completion
                   </div>
-                </div>
-
-                {/* Activity */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="space-y-1">
-                    <div className="text-[var(--color-text-muted)]">Machines:</div>
-                    <div className="text-white font-medium">
-                      <AnimatedCounter value={operator.connectedMachines} />
-                    </div>
+                  <div>
+                    <span className="font-medium text-white">{operator.connectedMachines}</span> machines
                   </div>
-                  <div className="space-y-1">
-                    <div className="text-[var(--color-text-muted)]">Active Ops:</div>
-                    <div className="text-white font-medium">
-                      <AnimatedCounter value={operator.activeOps} />
-                    </div>
+                  <div>
+                    <span className="font-medium text-white">{operator.activeOps}</span> ops
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="pt-4 border-t border-[var(--color-primary)]/30">
-                  <InteractiveButton
-                    variant="operator"
-                    size="sm"
-                    className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-black font-bold hover:from-[var(--color-primary)]/90 hover:to-[var(--color-secondary)]/90 shadow-lg shadow-[var(--color-primary)]/30 hover:shadow-xl hover:shadow-[var(--color-primary)]/40 transform hover:scale-105"
-                    glow
-                    pulse={false}
+                <div className="flex-shrink-0">
+                  <button
+                    className="px-4 py-1.5 text-xs bg-gray-200 text-gray-900 font-medium rounded hover:bg-gray-300 transition-colors duration-200"
                   >
-                    🔍 View Profile
-                  </InteractiveButton>
+                    View Profile
+                  </button>
                 </div>
-
-                {/* Last Active */}
-                <div className="text-xs text-[var(--color-text-muted)]">
-                  Last active: {operator.lastActive instanceof Date
-                    ? operator.lastActive.toLocaleDateString()
-                    : new Date(operator.lastActive).toLocaleDateString()}
-                </div>
-              </EnhancedCard>
+              </div>
             ))}
           </div>
         )}

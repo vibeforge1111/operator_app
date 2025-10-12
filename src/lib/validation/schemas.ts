@@ -94,6 +94,7 @@ export const OperatorProfileSchema = z.object({
   rank: z.enum(['Apprentice', 'Operator', 'Senior', 'Architect']),
   connectedMachines: z.number().int().min(0),
   activeOps: z.number().int().min(0),
+  completionRate: z.number().min(0).max(100).optional().default(95),
   bio: z.string().max(500).optional(),
   // Handle Firestore Timestamps and Date objects
   createdAt: z.union([

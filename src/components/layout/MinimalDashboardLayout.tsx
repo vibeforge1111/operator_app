@@ -31,27 +31,7 @@ export function MinimalDashboardLayout({
   walletAddress
 }: MinimalDashboardLayoutProps) {
   const [currentView, setCurrentView] = useState('dashboard');
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(256); // Default expanded width
-
-  // Handle theme toggle
-  const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
-  };
-
-  // Initialize dark mode
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
 
   // Listen for sidebar width changes
   useEffect(() => {
@@ -113,8 +93,6 @@ export function MinimalDashboardLayout({
         profile={profile}
         onConnectWallet={onConnectWallet}
         demoMode={demoMode}
-        isDarkMode={isDarkMode}
-        onThemeToggle={handleThemeToggle}
         sidebarWidth={sidebarWidth}
       />
 

@@ -5,8 +5,8 @@
  * Width: 64px collapsed / 256px expanded
  */
 
-import React, { useState } from 'react';
-import { LayoutDashboard, Cpu, Users, Activity, Settings, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Cpu, Users, Activity, Settings, ChevronRight, Sun, Moon } from 'lucide-react';
 
 interface CollapsibleSidebarProps {
   currentView: string;
@@ -23,6 +23,26 @@ const navItems = [
 
 export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Handle theme toggle
+  const handleThemeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  };
+
+  // Initialize dark mode
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   return (
     <div
@@ -87,8 +107,42 @@ export function CollapsibleSidebar({ currentView, onViewChange }: CollapsibleSid
         })}
       </nav>
 
-      {/* Collapse Toggle */}
-      <div className="p-2 border-t border-[var(--sidebar-border)]">
+      {/* Bottom Controls */}
+      <div className="p-2 border-t border-[var(--sidebar-border)] space-y-1">
+        {/* Theme Toggle */}
+        <button
+          onClick={handleThemeToggle}
+          className="
+            w-full flex items-center justify-center px-3 py-2 rounded-lg
+            text-[var(--muted-foreground)] hover:text-[var(--sidebar-foreground)]
+            hover:bg-[var(--sidebar-accent)] transition-all duration-200 group relative
+          "
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDarkMode ? (
+            <Sun className="w-5 h-5 flex-shrink-0" />
+          ) : (
+            <Moon className="w-5 h-5 flex-shrink-0" />
+          )}
+          {!isCollapsed && (
+            <span className="ml-3 font-medium animate-fade-in">
+              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          )}
+
+          {/* Tooltip for collapsed state */}
+          {isCollapsed && (
+            <div className="
+              absolute left-full ml-2 px-2 py-1 bg-[var(--sidebar-foreground)] text-[var(--sidebar)]
+              text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity
+              whitespace-nowrap pointer-events-none z-50
+            ">
+              {isDarkMode ? 'Switch to Light' : 'Switch to Dark'}
+            </div>
+          )}
+        </button>
+
+        {/* Collapse Toggle */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="

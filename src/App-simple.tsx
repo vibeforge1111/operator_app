@@ -47,9 +47,9 @@ function AppContent() {
   const handleConnectWallet = () => {
     if (!authenticated) {
       login(); // Open Privy login modal
-    } else {
-      logout(); // Disconnect wallet
     }
+    // Don't logout when clicking the connected button
+    // User can logout from a separate menu if needed
   };
 
   const handleConnectToMachine = (machineId: string) => {

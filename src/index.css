@@ -17,7 +17,7 @@
   --sidebar-border: #e5e5e5;
 
   /* Light Mode Semantic Status Colors */
-  --status-active: #10b981;
+  --status-active: #4DFFBC;
   --status-active-background: #ecfdf5;
   --status-inactive: #6b7280;
   --status-inactive-background: #f9fafb;
@@ -27,7 +27,7 @@
   --status-error-background: #fef2f2;
 
   /* Operator Network Brand */
-  --color-primary: #00ff88;
+  --color-primary: #4DFFBC;
   --color-secondary: #7c3aed;
   --color-accent: #fbbf24;
 
@@ -71,7 +71,7 @@
   --sidebar-border: #333333;
 
   /* Semantic Status Colors (Dark) */
-  --status-active: #22c55e;
+  --status-active: #4DFFBC;
   --status-active-background: #052e16;
   --status-inactive: #9ca3af;
   --status-inactive-background: #1f2937;

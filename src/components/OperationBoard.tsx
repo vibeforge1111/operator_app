@@ -67,6 +67,115 @@ const OPERATION_PRIORITIES: OperationPriority[] = ['Low', 'Medium', 'High', 'Cri
  */
 const OPERATION_STATUSES: OperationStatus[] = ['Open', 'InProgress', 'UnderReview', 'Completed', 'Cancelled'];
 
+// Dummy operations data for demo
+const DUMMY_OPERATIONS: Operation[] = [
+  {
+    id: 'op_001',
+    title: 'Implement Dark Mode Toggle',
+    description: 'Add a dark mode toggle to the settings panel that persists user preference in local storage. Should smoothly transition between themes and update all UI components.',
+    category: 'Development',
+    difficulty: 'Intermediate',
+    priority: 'High',
+    status: 'Open',
+    requiredSkills: ['React', 'CSS', 'TypeScript'],
+    estimatedHours: 4,
+    reward: { xp: 500, tokens: 50, currency: 'USDC' },
+    deadline: new Date(Date.now() + 1000 * 60 * 60 * 48), // 2 days from now
+    machineId: 'machine_123',
+    machineName: 'DeFi Dashboard',
+    tags: ['frontend', 'ui', 'feature'],
+    createdAt: new Date('2024-03-20'),
+    updatedAt: new Date(),
+    assignedTo: [],
+    completedBy: null,
+    verifiedBy: null
+  },
+  {
+    id: 'op_002',
+    title: 'Write API Documentation',
+    description: 'Document all REST API endpoints with clear examples, request/response formats, and error codes. Include authentication requirements and rate limiting information.',
+    category: 'Documentation',
+    difficulty: 'Beginner',
+    priority: 'Medium',
+    status: 'Open',
+    requiredSkills: ['Technical Writing', 'API Design'],
+    estimatedHours: 6,
+    reward: { xp: 300, tokens: 30, currency: 'USDC' },
+    deadline: new Date(Date.now() + 1000 * 60 * 60 * 72), // 3 days from now
+    machineId: 'machine_456',
+    machineName: 'API Gateway',
+    tags: ['documentation', 'api', 'technical-writing'],
+    createdAt: new Date('2024-03-19'),
+    updatedAt: new Date(),
+    assignedTo: [],
+    completedBy: null,
+    verifiedBy: null
+  },
+  {
+    id: 'op_003',
+    title: 'Design New Landing Page',
+    description: 'Create a modern, conversion-optimized landing page design. Should include hero section, features, testimonials, and clear CTAs. Mobile-responsive design required.',
+    category: 'Design',
+    difficulty: 'Advanced',
+    priority: 'Critical',
+    status: 'Open',
+    requiredSkills: ['UI Design', 'Figma', 'Web Design'],
+    estimatedHours: 12,
+    reward: { xp: 1000, tokens: 100, currency: 'USDC' },
+    deadline: new Date(Date.now() + 1000 * 60 * 60 * 24), // 1 day from now
+    machineId: 'machine_789',
+    machineName: 'Marketing Site',
+    tags: ['design', 'landing-page', 'ui-ux'],
+    createdAt: new Date('2024-03-21'),
+    updatedAt: new Date(),
+    assignedTo: [],
+    completedBy: null,
+    verifiedBy: null
+  },
+  {
+    id: 'op_004',
+    title: 'Smart Contract Security Audit',
+    description: 'Review and audit the token staking smart contract for security vulnerabilities. Provide detailed report with findings and recommendations.',
+    category: 'Research',
+    difficulty: 'Expert',
+    priority: 'Critical',
+    status: 'Open',
+    requiredSkills: ['Solidity', 'Security', 'Smart Contracts'],
+    estimatedHours: 20,
+    reward: { xp: 2000, tokens: 500, currency: 'USDC' },
+    deadline: new Date(Date.now() + 1000 * 60 * 60 * 96), // 4 days from now
+    machineId: 'machine_101',
+    machineName: 'DeFi Protocol',
+    tags: ['blockchain', 'security', 'audit'],
+    createdAt: new Date('2024-03-18'),
+    updatedAt: new Date(),
+    assignedTo: [],
+    completedBy: null,
+    verifiedBy: null
+  },
+  {
+    id: 'op_005',
+    title: 'Community Discord Bot',
+    description: 'Build a Discord bot for community management. Features: welcome messages, role assignment, moderation tools, and stats tracking.',
+    category: 'Development',
+    difficulty: 'Intermediate',
+    priority: 'Medium',
+    status: 'Open',
+    requiredSkills: ['Node.js', 'Discord.js', 'JavaScript'],
+    estimatedHours: 8,
+    reward: { xp: 750, tokens: 75, currency: 'USDC' },
+    deadline: new Date(Date.now() + 1000 * 60 * 60 * 120), // 5 days from now
+    machineId: 'machine_202',
+    machineName: 'Community Hub',
+    tags: ['bot', 'discord', 'community'],
+    createdAt: new Date('2024-03-20'),
+    updatedAt: new Date(),
+    assignedTo: [],
+    completedBy: null,
+    verifiedBy: null
+  }
+];
+
 export default function OperationBoard({ profile, onBack, onCompleteOperation }: OperationBoardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<OperationCategory | 'all'>('all');
@@ -81,6 +190,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   const [operations, setOperations] = useState<Operation[]>([]);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [realtimeManager] = useState(() => new RealtimeManager());
+  const [useDummyData, setUseDummyData] = useState(true); // Use dummy data for demo
 
   // XP System integration
   const { calculateXPReward, awardXP, isAwarding } = useXPSystem();
@@ -90,6 +200,15 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   useEffect(() => {
     setIsLoading(true);
     setLoadingError(null);
+
+    // Use dummy data for demo
+    if (useDummyData) {
+      setTimeout(() => {
+        setOperations(DUMMY_OPERATIONS);
+        setIsLoading(false);
+      }, 500);
+      return;
+    }
 
     // Clean up previous listeners
     realtimeManager.cleanup();
@@ -129,7 +248,7 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
     return () => {
       realtimeManager.cleanup();
     };
-  }, [selectedStatus, searchQuery]);
+  }, [selectedStatus, searchQuery, useDummyData]);
 
   /**
    * Filters and sorts operations based on current criteria
@@ -273,29 +392,29 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
       <div className="max-w-6xl mx-auto px-6 pb-8 space-y-6">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="operator-card rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-primary)]">
-              {operations.filter(op => op.status === 'open').length}
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center">
+            <div className="text-2xl font-medium text-[var(--foreground)]">
+              {operations.filter(op => op.status === 'Open').length}
             </div>
-            <div className="text-sm text-[var(--color-text-muted)]">Open Operations</div>
+            <div className="text-xs text-[var(--muted-foreground)]">Open Operations</div>
           </div>
-          <div className="operator-card rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-primary)]">
-              {filterOperationsBySkills(operations.filter(op => op.status === 'open'), profile.skills).length}
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center">
+            <div className="text-2xl font-medium text-[var(--foreground)]">
+              {filterOperationsBySkills(operations.filter(op => op.status === 'Open'), profile.skills).length}
             </div>
-            <div className="text-sm text-[var(--color-text-muted)]">Recommended</div>
+            <div className="text-xs text-[var(--muted-foreground)]">Recommended</div>
           </div>
-          <div className="operator-card rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-primary)]">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center">
+            <div className="text-2xl font-medium text-[var(--foreground)]">
               {operations.filter(op => op.assigneeId === profile.id).length}
             </div>
-            <div className="text-sm text-[var(--color-text-muted)]">Your Operations</div>
+            <div className="text-xs text-[var(--muted-foreground)]">Your Operations</div>
           </div>
-          <div className="operator-card rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-primary)]">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 text-center">
+            <div className="text-2xl font-medium text-[var(--foreground)]">
               {operations.filter(op => op.priority === 'Critical').length}
             </div>
-            <div className="text-sm text-[var(--color-text-muted)]">Critical Priority</div>
+            <div className="text-xs text-[var(--muted-foreground)]">Critical Priority</div>
           </div>
         </div>
 
@@ -399,129 +518,107 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
             {filteredOperations.map((operation) => (
-              <div key={operation.id} className="operator-card rounded-lg p-6 space-y-4 hover:border-[var(--color-primary)]/40 transition-colors">
+              <div key={operation.id} className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6 hover:border-[var(--foreground)]/20 transition-all duration-200">
                 {/* Operation Header */}
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-bold text-white">{operation.title}</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-sm font-medium ${OPERATION_PRIORITY_COLORS[operation.priority]}`}>
-                        {operation.priority}
-                      </span>
-                      <span className={`text-sm ${OPERATION_STATUS_COLORS[operation.status]}`}>
-                        {operation.status}
-                      </span>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[var(--muted)] flex items-center justify-center flex-shrink-0">
+                        <span className="text-xl">{getCategoryIcon(operation.category)}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-[var(--foreground)] mb-1">{operation.title}</h3>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className={`px-2 py-0.5 rounded border ${
+                            operation.priority === 'Critical' || operation.priority === 'High'
+                              ? 'text-[#FF4D4D] bg-[#FF4D4D]/10 border-[#FF4D4D]/30'
+                              : 'text-[var(--muted-foreground)] bg-[var(--muted)] border-[var(--border)]'
+                          }`}>
+                            {operation.priority}
+                          </span>
+                          <span className="text-[var(--muted-foreground)]">{operation.category}</span>
+                          <span className="text-[var(--muted-foreground)]">·</span>
+                          <span className="text-[var(--muted-foreground)]">{getDifficultyIcon(operation.difficulty)} {operation.difficulty}</span>
+                          <span className="text-[var(--muted-foreground)]">·</span>
+                          <span className="text-[var(--foreground)]">{operation.estimatedHours}h</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4 text-sm">
-                    <span className="flex items-center space-x-1">
-                      <span>{getCategoryIcon(operation.category)}</span>
-                      <span className="text-[var(--color-text-muted)]">{operation.category}</span>
-                    </span>
-                    <span className="flex items-center space-x-1">
-                      <span>{getDifficultyIcon(operation.difficulty)}</span>
-                      <span className="text-[var(--color-text-muted)]">{operation.difficulty}</span>
-                    </span>
-                    <span className="text-[var(--color-text-muted)]">{operation.estimatedHours}h</span>
+                  <div className="text-right">
+                    <div className="text-2xl font-medium text-[var(--color-primary)]/70">{calculateFinalXp(operation.reward.xp, operation.difficulty)}</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">XP reward</div>
                   </div>
                 </div>
 
                 {/* Description */}
-                <div className="text-[var(--color-text-muted)] text-sm leading-relaxed">
-                  {operation.description.split('\n')[0].substring(0, 150)}
-                  {operation.description.length > 150 && '...'}
+                <p className="text-[var(--muted-foreground)] text-sm leading-relaxed mb-4">
+                  {operation.description}
+                </p>
+
+                {/* Machine Info */}
+                <div className="flex items-center gap-2 mb-4 text-xs">
+                  <span className="text-[var(--muted-foreground)]">For machine:</span>
+                  <span className="text-[var(--foreground)]">{operation.machineName}</span>
                 </div>
 
                 {/* Required Skills */}
-                <div className="space-y-2">
-                  <div className="text-sm text-[var(--color-text-muted)]">Required Skills:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {operation.requiredSkills.map((skill) => (
-                      <span
-                        key={skill}
-                        className={`px-2 py-1 rounded text-xs border ${
-                          profile.skills.includes(skill as any)
-                            ? 'bg-[var(--color-primary)]/20 text-[var(--color-primary)] border-[var(--color-primary)]/30'
-                            : 'bg-gray-800 text-gray-400 border-gray-700'
-                        }`}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {operation.requiredSkills.map((skill) => (
+                    <span
+                      key={skill}
+                      className={`px-2 py-1 rounded text-xs border ${
+                        profile.skills.includes(skill as any)
+                          ? 'text-[var(--color-primary)]/70 bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30'
+                          : 'text-[var(--muted-foreground)] bg-[var(--background)] border-[var(--border)]'
+                      }`}
+                    >
+                      {skill}
+                    </span>
+                  ))}
                 </div>
 
-                {/* Rewards */}
-                <div className="grid grid-cols-3 gap-4 py-2 border-t border-[var(--color-primary)]/20">
-                  <div className="text-center">
-                    <div className="text-[var(--color-primary)] font-bold">
-                      {calculateFinalXp(operation.reward.xp, operation.difficulty)}
-                    </div>
-                    <div className="text-xs text-[var(--color-text-muted)]">XP</div>
-                  </div>
-                  {operation.reward.tokens && (
-                    <div className="text-center">
-                      <div className="text-[var(--color-primary)] font-bold">
-                        {operation.reward.tokens}
+                {/* Bottom Info Bar */}
+                <div className="flex items-center justify-between pt-4 border-t border-[var(--border)]">
+                  <div className="flex items-center gap-6 text-xs">
+                    {operation.reward.tokens && (
+                      <div className="text-[var(--muted-foreground)]">
+                        <span className="text-[var(--foreground)] font-medium">${operation.reward.tokens}</span> {operation.reward.currency}
                       </div>
-                      <div className="text-xs text-[var(--color-text-muted)]">{operation.reward.currency}</div>
-                    </div>
-                  )}
-                  {operation.deadline && (
-                    <div className="text-center">
-                      <div className={`font-bold ${
-                        getTimeRemaining(operation.deadline) === 'Overdue' ? 'text-red-400' : 'text-white'
+                    )}
+                    {operation.deadline && (
+                      <div className={`${
+                        getTimeRemaining(operation.deadline) === 'Overdue' ? 'text-[#FF4D4D]' : 'text-[var(--muted-foreground)]'
                       }`}>
-                        {getTimeRemaining(operation.deadline)}
+                        <span className="font-medium">{getTimeRemaining(operation.deadline)}</span> left
                       </div>
-                      <div className="text-xs text-[var(--color-text-muted)]">remaining</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Tags */}
-                {operation.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {operation.tags.slice(0, 4).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 bg-[var(--color-bg)] text-[var(--color-text-muted)] rounded text-xs border border-[var(--color-primary)]/20"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                    {operation.tags.length > 4 && (
-                      <span className="text-xs text-[var(--color-text-muted)] px-2 py-1">
-                        +{operation.tags.length - 4} more
-                      </span>
                     )}
                   </div>
-                )}
 
-                {/* Actions */}
-                <div className="flex space-x-2 pt-2">
-                  <button className="flex-1 py-2 bg-[var(--color-surface)] text-white border border-[var(--color-primary)]/30 rounded hover:border-[var(--color-primary)]/50 transition-colors text-sm">
-                    View Details
-                  </button>
-                  {operation.status === 'open' && (
-                    <button
-                      onClick={() => handleAcceptOperation(operation.id)}
-                      disabled={acceptingOperation === operation.id}
-                      className="flex-1 py-2 bg-[var(--color-primary)] text-black rounded hover:bg-[var(--color-primary)]/80 disabled:opacity-50 transition-colors text-sm font-medium flex items-center justify-center"
-                    >
-                      {acceptingOperation === operation.id ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Accepting...
-                        </>
-                      ) : (
-                        'Accept Operation'
-                      )}
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button className="px-4 py-1.5 text-xs bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded hover:bg-[var(--muted)] transition-colors">
+                      View Details
                     </button>
-                  )}
+                    {operation.status === 'Open' && (
+                      <button
+                        onClick={() => handleAcceptOperation(operation.id)}
+                        disabled={acceptingOperation === operation.id}
+                        className="px-4 py-1.5 text-xs bg-[var(--foreground)] text-[var(--background)] rounded hover:opacity-90 disabled:opacity-50 transition-opacity font-medium flex items-center"
+                      >
+                        {acceptingOperation === operation.id ? (
+                          <>
+                            <div className="w-3 h-3 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                            Accepting...
+                          </>
+                        ) : (
+                          'Accept Operation'
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

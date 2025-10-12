@@ -322,91 +322,95 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
             {filteredMachines.map((machine) => (
-              <div key={machine.id} className="operator-card rounded-lg p-6 space-y-4 hover:border-[var(--color-primary)]/40 transition-colors">
+              <div key={machine.id} className="bg-[var(--card)] border border-[var(--border)] rounded-lg p-6 hover:border-[var(--foreground)]/20 transition-all duration-200">
                 {/* Machine Header */}
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">{getCategoryIcon(machine.category)}</span>
-                      <h3 className="text-lg font-bold text-white">{machine.name}</h3>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm">
-                      <span className={`font-medium ${getStatusColor(machine.status)}`}>{machine.status}</span>
-                      <span className="text-[var(--color-text-muted)]">•</span>
-                      <span className="text-[var(--color-text-muted)]">{machine.category}</span>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-lg bg-[var(--muted)] flex items-center justify-center flex-shrink-0">
+                        <span className="text-2xl">{getCategoryIcon(machine.category)}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-[var(--foreground)] mb-1">{machine.name}</h3>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className={`px-2 py-0.5 rounded border ${
+                            machine.status === 'Active'
+                              ? 'text-[var(--color-primary)]/70 bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30'
+                              : 'text-[var(--muted-foreground)] bg-[var(--muted)] border-[var(--border)]'
+                          }`}>
+                            {machine.status}
+                          </span>
+                          <span className="text-[var(--muted-foreground)]">{machine.category}</span>
+                          <span className="text-[var(--muted-foreground)]">·</span>
+                          <span className="text-[var(--foreground)]">{machine.earnings.monthly} {machine.earnings.currency}/mo</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right text-sm">
-                    <div className="text-[var(--color-primary)] font-medium">{machine.earnings.monthly} {machine.earnings.currency}/mo</div>
-                    <div className="text-[var(--color-text-muted)]">{machine.metrics.users} users</div>
+                  <div className="text-right">
+                    <div className="text-2xl font-medium text-[var(--foreground)]">{machine.metrics.users}</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">active users</div>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">{machine.description}</p>
+                <p className="text-[var(--muted-foreground)] text-sm leading-relaxed mb-4">
+                  {machine.description}
+                </p>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {machine.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded text-xs border border-[var(--color-primary)]/20"
+                      className="px-2 py-1 bg-[var(--background)] text-[var(--muted-foreground)] rounded text-xs border border-[var(--border)]"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                {/* Operators */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-white">Operators ({machine.operators.length}/{machine.maxOperators})</span>
-                    <div className="flex space-x-1">
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-4 gap-4 py-4 border-y border-[var(--border)]">
+                  <div>
+                    <div className="text-sm font-medium text-[var(--foreground)]">${machine.metrics.revenue.toLocaleString()}</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">Total Revenue</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-[var(--foreground)]">{machine.metrics.uptime}%</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">Uptime</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-[var(--foreground)]">{machine.operators.length}/{machine.maxOperators}</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">Operators</div>
+                  </div>
+                  <div>
+                    <div className="flex gap-0.5">
                       {Array.from({ length: machine.maxOperators }).map((_, i) => (
                         <div
                           key={i}
-                          className={`w-2 h-2 rounded-full ${
+                          className={`w-1.5 h-4 rounded-sm ${
                             i < machine.operators.length
-                              ? 'bg-[var(--color-primary)]'
-                              : 'bg-[var(--color-primary)]/20'
+                              ? 'bg-[var(--color-primary)]/70'
+                              : 'bg-[var(--border)]'
                           }`}
                         />
                       ))}
                     </div>
-                  </div>
-                  {machine.operators.length > 0 && (
-                    <div className="text-sm text-[var(--color-text-muted)]">
-                      Connected: {getOperatorNames(machine.operators).join(', ')}
-                    </div>
-                  )}
-                </div>
-
-                {/* Metrics */}
-                <div className="grid grid-cols-3 gap-4 text-center text-sm border-t border-[var(--color-primary)]/20 pt-4">
-                  <div>
-                    <div className="text-[var(--color-primary)] font-medium">${machine.metrics.revenue.toLocaleString()}</div>
-                    <div className="text-[var(--color-text-muted)] text-xs">Revenue</div>
-                  </div>
-                  <div>
-                    <div className="text-[var(--color-primary)] font-medium">{machine.metrics.users.toLocaleString()}</div>
-                    <div className="text-[var(--color-text-muted)] text-xs">Users</div>
-                  </div>
-                  <div>
-                    <div className="text-[var(--color-primary)] font-medium">{machine.metrics.uptime}%</div>
-                    <div className="text-[var(--color-text-muted)] text-xs">Uptime</div>
+                    <div className="text-xs text-[var(--muted-foreground)]">Capacity</div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex space-x-3">
+                <div className="flex gap-3 mt-4">
                   {machine.liveUrl && (
                     <a
                       href={machine.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-2 text-center bg-[var(--color-primary)]/20 text-[var(--color-primary)] rounded border border-[var(--color-primary)]/30 hover:bg-[var(--color-primary)]/30 transition-colors text-sm"
+                      className="flex-1 px-4 py-2 text-center bg-[var(--background)] text-[var(--foreground)] rounded border border-[var(--border)] hover:bg-[var(--muted)] transition-colors text-sm"
                     >
                       Visit Live
                     </a>
@@ -414,14 +418,14 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
                   <button
                     onClick={() => handleMachineConnection(machine.id)}
                     disabled={machine.operators.length >= machine.maxOperators || connectingToMachine === machine.id}
-                    className="flex-1 py-2 bg-[var(--color-primary)] text-black rounded hover:bg-[var(--color-primary)]/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center justify-center"
+                    className="flex-1 px-4 py-2 bg-[var(--foreground)] text-[var(--background)] rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity text-sm font-medium flex items-center justify-center"
                   >
                     {connectingToMachine === machine.id ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
+                        <div className="w-4 h-4 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin mr-2"></div>
                         Connecting...
                       </>
-                    ) : machine.operators.length >= machine.maxOperators ? 'Full' : 'Connect'}
+                    ) : machine.operators.length >= machine.maxOperators ? 'Full' : 'Connect to Machine'}
                   </button>
                 </div>
               </div>

@@ -156,6 +156,455 @@ const DUMMY_OPERATORS: OperatorProfile[] = [
     createdAt: new Date('2024-03-20'),
     updatedAt: new Date(),
     lastActive: new Date(),
+  },
+  // Additional operators for pagination testing
+  {
+    id: 'op_009',
+    walletAddress: '0x90123456781234567890abcdef12345678901236',
+    handle: 'zenith',
+    skills: ['Dev', 'Coordination'],
+    xp: 2800,
+    rank: 'Senior',
+    connectedMachines: 7,
+    activeOps: 3,
+    completionRate: 91,
+    createdAt: new Date('2024-01-25'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_010',
+    walletAddress: '0xa0123456781234567890abcdef12345678901237',
+    handle: 'aurora',
+    skills: ['Design', 'Narrative', 'VibeOps'],
+    xp: 1650,
+    rank: 'Operator',
+    connectedMachines: 3,
+    activeOps: 1,
+    completionRate: 84,
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_011',
+    walletAddress: '0xb0123456781234567890abcdef12345678901238',
+    handle: 'cosmos',
+    skills: ['Dev', 'BizOps', 'Coordination'],
+    xp: 5200,
+    rank: 'Architect',
+    connectedMachines: 15,
+    activeOps: 5,
+    completionRate: 99,
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_012',
+    walletAddress: '0xc0123456781234567890abcdef12345678901239',
+    handle: 'pulsar',
+    skills: ['Design'],
+    xp: 750,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 72,
+    createdAt: new Date('2024-03-25'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_013',
+    walletAddress: '0xd0123456781234567890abcdef1234567890123a',
+    handle: 'nexus',
+    skills: ['Dev', 'Design', 'Narrative'],
+    xp: 3100,
+    rank: 'Senior',
+    connectedMachines: 9,
+    activeOps: 2,
+    completionRate: 93,
+    createdAt: new Date('2024-01-30'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_014',
+    walletAddress: '0xe0123456781234567890abcdef1234567890123b',
+    handle: 'vortex',
+    skills: ['Coordination', 'BizOps'],
+    xp: 1400,
+    rank: 'Operator',
+    connectedMachines: 4,
+    activeOps: 1,
+    completionRate: 82,
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_015',
+    walletAddress: '0xf0123456781234567890abcdef1234567890123c',
+    handle: 'stellar',
+    skills: ['VibeOps', 'Design'],
+    xp: 950,
+    rank: 'Apprentice',
+    connectedMachines: 2,
+    activeOps: 1,
+    completionRate: 76,
+    createdAt: new Date('2024-03-18'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_016',
+    walletAddress: '0x00123456781234567890abcdef1234567890123d',
+    handle: 'quasar',
+    skills: ['Dev', 'Coordination', 'BizOps'],
+    xp: 4100,
+    rank: 'Architect',
+    connectedMachines: 13,
+    activeOps: 4,
+    completionRate: 97,
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_017',
+    walletAddress: '0x10123456781234567890abcdef1234567890123e',
+    handle: 'horizon',
+    skills: ['Design', 'Narrative'],
+    xp: 1950,
+    rank: 'Operator',
+    connectedMachines: 5,
+    activeOps: 2,
+    completionRate: 86,
+    createdAt: new Date('2024-02-05'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_018',
+    walletAddress: '0x20123456781234567890abcdef1234567890123f',
+    handle: 'galaxy',
+    skills: ['Dev', 'VibeOps'],
+    xp: 2400,
+    rank: 'Senior',
+    connectedMachines: 6,
+    activeOps: 2,
+    completionRate: 89,
+    createdAt: new Date('2024-02-12'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_019',
+    walletAddress: '0x30123456781234567890abcdef12345678901240',
+    handle: 'orbit',
+    skills: ['Coordination'],
+    xp: 600,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 70,
+    createdAt: new Date('2024-03-28'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_020',
+    walletAddress: '0x40123456781234567890abcdef12345678901241',
+    handle: 'meteor',
+    skills: ['Dev', 'Design', 'BizOps'],
+    xp: 3500,
+    rank: 'Senior',
+    connectedMachines: 11,
+    activeOps: 3,
+    completionRate: 94,
+    createdAt: new Date('2024-01-22'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_021',
+    walletAddress: '0x50123456781234567890abcdef12345678901242',
+    handle: 'comet',
+    skills: ['Narrative', 'VibeOps'],
+    xp: 1100,
+    rank: 'Apprentice',
+    connectedMachines: 2,
+    activeOps: 1,
+    completionRate: 77,
+    createdAt: new Date('2024-03-10'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_022',
+    walletAddress: '0x60123456781234567890abcdef12345678901243',
+    handle: 'lunar',
+    skills: ['Design', 'Coordination'],
+    xp: 2250,
+    rank: 'Operator',
+    connectedMachines: 6,
+    activeOps: 2,
+    completionRate: 87,
+    createdAt: new Date('2024-02-08'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_023',
+    walletAddress: '0x70123456781234567890abcdef12345678901244',
+    handle: 'solar',
+    skills: ['Dev', 'BizOps', 'VibeOps'],
+    xp: 4800,
+    rank: 'Architect',
+    connectedMachines: 14,
+    activeOps: 5,
+    completionRate: 98,
+    createdAt: new Date('2024-01-08'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_024',
+    walletAddress: '0x80123456781234567890abcdef12345678901245',
+    handle: 'astro',
+    skills: ['Design'],
+    xp: 850,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 73,
+    createdAt: new Date('2024-03-22'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_025',
+    walletAddress: '0x90123456781234567890abcdef12345678901246',
+    handle: 'cosmic',
+    skills: ['Dev', 'Narrative', 'Coordination'],
+    xp: 2900,
+    rank: 'Senior',
+    connectedMachines: 8,
+    activeOps: 3,
+    completionRate: 90,
+    createdAt: new Date('2024-01-28'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_026',
+    walletAddress: '0xa0123456781234567890abcdef12345678901247',
+    handle: 'photon',
+    skills: ['BizOps', 'VibeOps'],
+    xp: 1550,
+    rank: 'Operator',
+    connectedMachines: 3,
+    activeOps: 1,
+    completionRate: 83,
+    createdAt: new Date('2024-02-18'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_027',
+    walletAddress: '0xb0123456781234567890abcdef12345678901248',
+    handle: 'neutron',
+    skills: ['Dev', 'Design'],
+    xp: 3700,
+    rank: 'Senior',
+    connectedMachines: 10,
+    activeOps: 4,
+    completionRate: 96,
+    createdAt: new Date('2024-01-18'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_028',
+    walletAddress: '0xc0123456781234567890abcdef12345678901249',
+    handle: 'proton',
+    skills: ['Coordination', 'Narrative'],
+    xp: 1000,
+    rank: 'Apprentice',
+    connectedMachines: 2,
+    activeOps: 0,
+    completionRate: 74,
+    createdAt: new Date('2024-03-14'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_029',
+    walletAddress: '0xd0123456781234567890abcdef1234567890124a',
+    handle: 'electron',
+    skills: ['Dev', 'BizOps'],
+    xp: 2650,
+    rank: 'Senior',
+    connectedMachines: 7,
+    activeOps: 2,
+    completionRate: 88,
+    createdAt: new Date('2024-02-02'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_030',
+    walletAddress: '0xe0123456781234567890abcdef1234567890124b',
+    handle: 'atom',
+    skills: ['Design', 'VibeOps', 'Coordination'],
+    xp: 1750,
+    rank: 'Operator',
+    connectedMachines: 4,
+    activeOps: 2,
+    completionRate: 85,
+    createdAt: new Date('2024-02-22'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_031',
+    walletAddress: '0xf0123456781234567890abcdef1234567890124c',
+    handle: 'particle',
+    skills: ['Dev'],
+    xp: 550,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 71,
+    createdAt: new Date('2024-03-26'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_032',
+    walletAddress: '0x00123456781234567890abcdef1234567890124d',
+    handle: 'fusion',
+    skills: ['Dev', 'Design', 'BizOps', 'Coordination'],
+    xp: 5500,
+    rank: 'Architect',
+    connectedMachines: 16,
+    activeOps: 6,
+    completionRate: 99,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_033',
+    walletAddress: '0x10123456781234567890abcdef1234567890124e',
+    handle: 'plasma',
+    skills: ['Narrative', 'Design'],
+    xp: 1450,
+    rank: 'Operator',
+    connectedMachines: 3,
+    activeOps: 1,
+    completionRate: 81,
+    createdAt: new Date('2024-02-25'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_034',
+    walletAddress: '0x20123456781234567890abcdef1234567890124f',
+    handle: 'energy',
+    skills: ['Dev', 'VibeOps'],
+    xp: 3300,
+    rank: 'Senior',
+    connectedMachines: 9,
+    activeOps: 3,
+    completionRate: 92,
+    createdAt: new Date('2024-01-26'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_035',
+    walletAddress: '0x30123456781234567890abcdef12345678901250',
+    handle: 'quantum_leap',
+    skills: ['BizOps', 'Coordination'],
+    xp: 2000,
+    rank: 'Operator',
+    connectedMachines: 5,
+    activeOps: 2,
+    completionRate: 86,
+    createdAt: new Date('2024-02-14'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_036',
+    walletAddress: '0x40123456781234567890abcdef12345678901251',
+    handle: 'warp',
+    skills: ['Dev', 'Design', 'Narrative'],
+    xp: 4200,
+    rank: 'Architect',
+    connectedMachines: 12,
+    activeOps: 4,
+    completionRate: 97,
+    createdAt: new Date('2024-01-12'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_037',
+    walletAddress: '0x50123456781234567890abcdef12345678901252',
+    handle: 'flux',
+    skills: ['VibeOps'],
+    xp: 700,
+    rank: 'Apprentice',
+    connectedMachines: 1,
+    activeOps: 0,
+    completionRate: 69,
+    createdAt: new Date('2024-03-30'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_038',
+    walletAddress: '0x60123456781234567890abcdef12345678901253',
+    handle: 'momentum',
+    skills: ['Dev', 'Coordination', 'BizOps'],
+    xp: 3600,
+    rank: 'Senior',
+    connectedMachines: 10,
+    activeOps: 3,
+    completionRate: 95,
+    createdAt: new Date('2024-01-24'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_039',
+    walletAddress: '0x70123456781234567890abcdef12345678901254',
+    handle: 'velocity',
+    skills: ['Design', 'Narrative'],
+    xp: 1350,
+    rank: 'Operator',
+    connectedMachines: 3,
+    activeOps: 1,
+    completionRate: 79,
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
+  },
+  {
+    id: 'op_040',
+    walletAddress: '0x80123456781234567890abcdef12345678901255',
+    handle: 'dimension',
+    skills: ['Dev', 'Design', 'VibeOps', 'Coordination'],
+    xp: 6000,
+    rank: 'Architect',
+    connectedMachines: 18,
+    activeOps: 7,
+    completionRate: 100,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+    lastActive: new Date(),
   }
 ];
 
@@ -170,6 +619,8 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   const [operators, setOperators] = useState<OperatorProfile[]>([]);
   const [realtimeManager] = useState(() => new RealtimeManager());
   const [useDummyData, setUseDummyData] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Debounce search query
   React.useEffect(() => {
@@ -296,6 +747,17 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
   // Firebase already handles filtering and sorting
   const filteredOperators = operators;
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOperators.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOperators = filteredOperators.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters or items per page change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSkill, selectedRank, debouncedSearchQuery, sortBy, itemsPerPage]);
+
   // Show loading state
   if (isLoading) {
     return (
@@ -419,10 +881,31 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           </div>
         </div>
 
-        {/* Results Count */}
-        <div className="text-[var(--muted-foreground)] text-sm flex items-center gap-2">
-          <AnimatedCounter value={filteredOperators.length} />
-          <span>operator{filteredOperators.length !== 1 ? 's' : ''} found</span>
+        {/* Results Count and Items Per Page */}
+        <div className="flex items-center justify-between">
+          <div className="text-[var(--muted-foreground)] text-sm flex items-center gap-2">
+            <AnimatedCounter value={filteredOperators.length} />
+            <span>operator{filteredOperators.length !== 1 ? 's' : ''} found</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {filteredOperators.length > 10 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-[var(--muted-foreground)]">Show</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                  className="px-2 py-1 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="100">100</option>
+                </select>
+                <span className="text-[var(--muted-foreground)]">per page</span>
+              </div>
+            )}
+
+          </div>
         </div>
 
         {/* Operator Grid */}
@@ -442,7 +925,7 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
           </EnhancedCard>
         ) : (
           <div className="space-y-2">
-            {filteredOperators.map((operator, index) => (
+            {paginatedOperators.map((operator, index) => (
               <div
                 key={operator.id}
                 className="flex items-center gap-4 p-4 bg-[var(--card)] border border-[var(--border)] rounded-lg hover:border-[var(--foreground)]/20 transition-all duration-200"
@@ -499,6 +982,109 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             ))}
           </div>
         )}
+
+        {/* Bottom Section with Pagination and Count */}
+        <div className="flex items-center justify-between mt-8">
+          {/* Pagination Controls - Left/Center */}
+          {totalPages > 1 ? (
+            <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1.5 text-sm rounded border transition-all duration-200 ${
+                currentPage === 1
+                  ? 'bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)] cursor-not-allowed opacity-50'
+                  : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+              }`}
+            >
+              ←
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {/* Always show first page */}
+              <button
+                onClick={() => setCurrentPage(1)}
+                className={`px-3 py-1.5 text-sm rounded border transition-all duration-200 ${
+                  currentPage === 1
+                    ? 'bg-[var(--foreground)] text-[var(--background)] border-[var(--foreground)]'
+                    : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+                }`}
+              >
+                1
+              </button>
+
+              {/* Show ellipsis if needed */}
+              {currentPage > 3 && totalPages > 5 && (
+                <span className="px-2 text-[var(--muted-foreground)]">...</span>
+              )}
+
+              {/* Show pages around current page */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  if (page === 1 || page === totalPages) return false;
+                  if (totalPages <= 5) return true;
+                  return Math.abs(page - currentPage) <= 1;
+                })
+                .map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1.5 text-sm rounded border transition-all duration-200 ${
+                      currentPage === page
+                        ? 'bg-[var(--foreground)] text-[var(--background)] border-[var(--foreground)]'
+                        : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+              {/* Show ellipsis if needed */}
+              {currentPage < totalPages - 2 && totalPages > 5 && (
+                <span className="px-2 text-[var(--muted-foreground)]">...</span>
+              )}
+
+              {/* Always show last page if more than 1 page */}
+              {totalPages > 1 && (
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className={`px-3 py-1.5 text-sm rounded border transition-all duration-200 ${
+                    currentPage === totalPages
+                      ? 'bg-[var(--foreground)] text-[var(--background)] border-[var(--foreground)]'
+                      : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+                  }`}
+                >
+                  {totalPages}
+                </button>
+              )}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 text-sm rounded border transition-all duration-200 ${
+                currentPage === totalPages
+                  ? 'bg-[var(--muted)] text-[var(--muted-foreground)] border-[var(--border)] cursor-not-allowed opacity-50'
+                  : 'bg-[var(--background)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+              }`}
+            >
+              →
+            </button>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {/* Showing count - Right */}
+          {filteredOperators.length > 0 && (
+            <span className="text-xs text-[var(--muted-foreground)]">
+              Showing {Math.min(startIndex + 1, filteredOperators.length)}-{Math.min(endIndex, filteredOperators.length)} of {filteredOperators.length}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -76,7 +76,12 @@ export function MinimalDashboardLayout({
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <MVPDashboard profile={profile} />;
+        return <MVPDashboard profile={profile} onNavigate={(view) => {
+          setCurrentView(view);
+          if (onNavigate) {
+            onNavigate(view);
+          }
+        }} />;
       case 'operators':
         return <OperatorDirectory onBack={() => setCurrentView('dashboard')} />;
       case 'machines':

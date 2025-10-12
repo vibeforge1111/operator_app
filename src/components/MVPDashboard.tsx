@@ -11,9 +11,10 @@ import { AnimatedCounter } from './ui/AnimatedCounter';
 
 interface MVPDashboardProps {
   profile: OperatorProfile;
+  onNavigate?: (view: string) => void;
 }
 
-export function MVPDashboard({ profile }: MVPDashboardProps) {
+export function MVPDashboard({ profile, onNavigate }: MVPDashboardProps) {
   // MVP Stat Cards Data (following canonical schema)
   const [operatorStats] = useState({
     activeOps: 2,
@@ -36,33 +37,36 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
   const [yourMachines] = useState([
     {
       id: 1,
-      name: 'Mars Survival Game',
-      category: 'GameOps',
+      name: 'CT Online',
+      category: 'Gaming',
       role: 'Contributor',
-      openOps: 3,
-      activeOps: 1,
+      openOps: 47,
+      activeOps: 34,
       contributors: 2,
-      completed7d: 5
+      completed7d: 5,
+      monthlyRevenue: 8500000
     },
     {
       id: 2,
-      name: 'AI Content Generator',
-      category: 'Tooling',
+      name: 'Predictooor',
+      category: 'Prediction Markets',
       role: 'Maintainer',
-      openOps: 2,
-      activeOps: 2,
+      openOps: 32,
+      activeOps: 45,
       contributors: 1,
-      completed7d: 8
+      completed7d: 8,
+      monthlyRevenue: 12400000
     },
     {
       id: 3,
-      name: 'Analytics Dashboard',
-      category: 'Other',
+      name: 'Clipper Marketplace',
+      category: 'Social',
       role: 'Owner',
-      openOps: 5,
-      activeOps: 0,
+      openOps: 28,
+      activeOps: 23,
       contributors: 0,
-      completed7d: 0
+      completed7d: 0,
+      monthlyRevenue: 5700000
     },
   ]);
 
@@ -119,13 +123,13 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity Section */}
-        <div className="lg:col-span-4">
+        <div>
           <div className="clean-card p-6 h-full flex flex-col">
             <div className="flex-shrink-0">
               <div className="flex items-center gap-2 mb-2">
-                <div className="status-dot-running"></div>
+                <span className="text-xl text-[var(--muted-foreground)]">⚡</span>
                 <h3 className="text-lg font-medium text-[var(--foreground)]">Recent Activity</h3>
               </div>
               <p className="text-sm text-[var(--muted-foreground)] mb-6">Real-time operator actions</p>
@@ -138,7 +142,7 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
                     <div className="w-2 h-2 rounded-full bg-[var(--status-active)] mt-2"></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[var(--foreground)]">
-                        <span className="font-medium text-[var(--color-primary)]">{activity.user}</span>
+                        <span className="font-medium text-[var(--foreground)]">{activity.user}</span>
                       </p>
                       <p className="text-sm text-[var(--muted-foreground)] mt-1">
                         {activity.action}
@@ -153,12 +157,12 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
         </div>
 
         {/* Active Machines Section */}
-        <div className="lg:col-span-8">
+        <div>
           <div className="clean-card p-6">
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">⚙️</span>
+                  <span className="text-xl text-[var(--muted-foreground)]">⚙️</span>
                   <h3 className="text-lg font-medium text-[var(--foreground)]">Active Machines</h3>
                 </div>
                 <p className="text-sm text-[var(--muted-foreground)]">Automated machines running in the network</p>
@@ -174,13 +178,12 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-[var(--foreground)]">{machine.name}</span>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-transparent border border-[var(--status-active)] text-[var(--foreground)]">
-                            <span className="status-dot-running mr-1"></span>
-                            running
+                          <span className="px-2 py-0.5 rounded text-xs text-[var(--muted-foreground)] bg-[var(--muted)]">
+                            {machine.category}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
-                          <span className="font-medium text-[var(--color-primary)]">@{machine.role.toLowerCase()}</span>
+                          <span>${(machine.monthlyRevenue / 1000000).toFixed(1)}M/mo</span>
                           <span>•</span>
                           <span>{machine.activeOps} active ops</span>
                           <span>•</span>
@@ -198,10 +201,16 @@ export function MVPDashboard({ profile }: MVPDashboardProps) {
 
       {/* Quick Actions */}
       <div className="flex gap-4">
-        <button className="px-4 py-2 bg-[var(--color-primary)] text-black font-medium rounded hover:bg-[var(--color-primary)]/90 transition-colors">
+        <button
+          onClick={() => onNavigate?.('operations')}
+          className="px-4 py-2 bg-[var(--color-primary)] text-black font-medium rounded hover:bg-[var(--color-primary)]/90 transition-colors"
+        >
           Find Ops
         </button>
-        <button className="px-4 py-2 bg-[var(--muted)] text-[var(--foreground)] border border-[var(--border)] rounded hover:bg-[var(--border)] transition-colors">
+        <button
+          onClick={() => onNavigate?.('machines')}
+          className="px-4 py-2 bg-[var(--muted)] text-[var(--foreground)] border border-[var(--border)] rounded hover:bg-[var(--border)] transition-colors"
+        >
           Connect a Machine
         </button>
       </div>

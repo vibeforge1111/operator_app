@@ -5,12 +5,12 @@
  */
 
 import React, { useState } from 'react';
-import { Wallet, ChevronDown, LogOut } from 'lucide-react';
+import { Wallet, ChevronDown, LogOut, User } from 'lucide-react';
 import { OperatorProfile } from '../../types/operator';
 import { usePrivy } from '@privy-io/react-auth';
 
 interface MinimalTopBarProps {
-  profile: OperatorProfile;
+  profile: OperatorProfile & { profilePicture?: string };
   onConnectWallet: () => void;
   demoMode: boolean;
   sidebarWidth: number;
@@ -59,23 +59,37 @@ export function MinimalTopBar({
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="
-                flex items-center space-x-2 px-4 py-2 rounded-lg border border-[var(--border)]
+                flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[var(--border)]
                 bg-[var(--card)] hover:bg-[var(--muted)] transition-all duration-200
                 hover:border-[var(--muted-foreground)]
               "
             >
-              <Wallet className="w-4 h-4 text-[var(--muted-foreground)]" />
+              {/* Profile Picture */}
+              <div className="w-8 h-8 rounded-full bg-[var(--muted)] flex items-center justify-center overflow-hidden">
+                {profile.profilePicture ? (
+                  <img src={profile.profilePicture} alt={profile.handle} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-[var(--muted-foreground)]" />
+                )}
+              </div>
+              {/* Handle */}
               <span className="text-sm font-medium text-[var(--foreground)]">
-                Connected
+                {profile.handle}
               </span>
               <div className="w-2 h-2 rounded-full bg-[var(--status-active)]"></div>
               <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-56 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-lg z-50">
                 <div className="p-2">
-                  <div className="px-3 py-2 text-xs text-[var(--muted-foreground)] border-b border-[var(--border)]">
+                  <div className="px-3 py-2 text-xs text-[var(--muted-foreground)]">
+                    Handle
+                  </div>
+                  <div className="px-3 py-2 text-sm font-medium text-[var(--foreground)] border-b border-[var(--border)]">
+                    @{profile.handle}
+                  </div>
+                  <div className="px-3 py-2 text-xs text-[var(--muted-foreground)] mt-2">
                     Wallet Address
                   </div>
                   <div className="px-3 py-2 text-xs font-mono text-[var(--foreground)]">

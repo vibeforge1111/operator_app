@@ -11,6 +11,7 @@ import { MVPDashboard } from '../MVPDashboard';
 import OperatorDirectory from '../OperatorDirectory';
 import MachineMarketplace from '../MachineMarketplace';
 import OperationBoard from '../OperationBoard';
+import Settings from '../Settings';
 import { OperatorProfile } from '../../types/operator';
 
 interface MinimalDashboardLayoutProps {
@@ -23,6 +24,8 @@ interface MinimalDashboardLayoutProps {
   currentView?: string;
   onConnectToMachine?: (machineId: string) => void;
   onCompleteOperation?: (operationId: string) => void;
+  onProfileUpdate?: (updates: Partial<OperatorProfile>) => Promise<void>;
+  onDisconnect?: () => void;
 }
 
 export function MinimalDashboardLayout({
@@ -34,7 +37,9 @@ export function MinimalDashboardLayout({
   walletAddress,
   currentView: externalView,
   onConnectToMachine,
-  onCompleteOperation
+  onCompleteOperation,
+  onProfileUpdate,
+  onDisconnect
 }: MinimalDashboardLayoutProps) {
   const [currentView, setCurrentView] = useState(externalView || 'dashboard');
 
@@ -88,6 +93,13 @@ export function MinimalDashboardLayout({
         return <MachineMarketplace onBack={() => setCurrentView('dashboard')} onConnectToMachine={onConnectToMachine || (() => {})} />;
       case 'operations':
         return <OperationBoard profile={profile} onBack={() => setCurrentView('dashboard')} onCompleteOperation={onCompleteOperation || (() => {})} />;
+      case 'settings':
+        return <Settings
+          profile={profile}
+          onBack={() => setCurrentView('dashboard')}
+          onProfileUpdate={onProfileUpdate || (async () => {})}
+          onDisconnect={onDisconnect || (() => {})}
+        />;
       default:
         return <MVPDashboard profile={profile} />;
     }

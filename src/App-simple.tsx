@@ -6,15 +6,19 @@ import OperatorDirectory from './components/OperatorDirectory';
 import MachineMarketplace from './components/MachineMarketplace';
 import OperationBoard from './components/OperationBoard';
 import NotificationSystem from './components/NotificationSystem';
+import Settings from './components/Settings';
 import { OperatorProfile } from './types/operator';
 import { useOperatorProfile } from './hooks/useOperatorProfile';
 
 function AppContent() {
   const { ready, authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
-  const [currentView, setCurrentView] = useState<'dashboard' | 'operators' | 'machines' | 'operations'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'operators' | 'machines' | 'operations' | 'settings'>('dashboard');
   const [primaryWalletAddress, setPrimaryWalletAddress] = useState<string | null>(null);
   const { profile: realProfile, loading } = useOperatorProfile(primaryWalletAddress);
+
+  // Local state for profile updates
+  const [localProfile, setLocalProfile] = useState<OperatorProfile | null>(null);
 
   // Get the primary wallet address (prefer BNB Chain wallet)
   useEffect(() => {
@@ -40,8 +44,33 @@ function AppContent() {
     lastActive: new Date(),
   };
 
-  // Use real profile if available, otherwise demo
-  const currentProfile = authenticated && realProfile ? realProfile : demoProfile;
+  // Initialize local profile from localStorage or real profile
+  useEffect(() => {
+    if (primaryWalletAddress) {
+      // Try to load from localStorage first
+      const storedProfile = localStorage.getItem(`profile_${primaryWalletAddress}`);
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          // Convert date strings back to Date objects
+          parsedProfile.createdAt = new Date(parsedProfile.createdAt);
+          parsedProfile.updatedAt = new Date(parsedProfile.updatedAt);
+          parsedProfile.lastActive = new Date(parsedProfile.lastActive);
+          setLocalProfile(parsedProfile);
+        } catch (e) {
+          console.error('Failed to parse stored profile', e);
+          if (realProfile) {
+            setLocalProfile(realProfile);
+          }
+        }
+      } else if (realProfile) {
+        setLocalProfile(realProfile);
+      }
+    }
+  }, [realProfile, primaryWalletAddress]);
+
+  // Use local profile if available (for immediate updates), otherwise real profile, otherwise demo
+  const currentProfile = localProfile || (authenticated && realProfile ? realProfile : demoProfile);
   const demoMode = !authenticated;
 
   const handleConnectWallet = () => {
@@ -74,12 +103,42 @@ function AppContent() {
       case 'operations':
         setCurrentView('operations');
         break;
+      case 'settings':
+        setCurrentView('settings');
+        break;
       case 'dashboard':
         setCurrentView('dashboard');
         break;
       default:
         setCurrentView('dashboard');
     }
+  };
+
+  // Handle profile update from Settings
+  const handleProfileUpdate = async (updates: Partial<OperatorProfile & { profilePicture?: string }>) => {
+    // Update local state immediately for responsive UI
+    if (localProfile || realProfile) {
+      const updatedProfile = {
+        ...(localProfile || realProfile),
+        ...updates,
+        updatedAt: new Date()
+      } as OperatorProfile & { profilePicture?: string };
+
+      setLocalProfile(updatedProfile);
+
+      // Store in localStorage for persistence
+      localStorage.setItem(`profile_${primaryWalletAddress}`, JSON.stringify(updatedProfile));
+    }
+
+    // In a real app, this would also save to Firebase/blockchain
+    console.log('Profile updated:', updates);
+    return Promise.resolve();
+  };
+
+  // Handle wallet disconnect
+  const handleDisconnect = () => {
+    logout();
+    setCurrentView('dashboard');
   };
 
   // Show loading state while Privy initializes
@@ -107,6 +166,8 @@ function AppContent() {
         currentView={currentView}
         onConnectToMachine={handleConnectToMachine}
         onCompleteOperation={handleCompleteOperation}
+        onProfileUpdate={handleProfileUpdate}
+        onDisconnect={handleDisconnect}
       />
       <NotificationSystem />
     </>

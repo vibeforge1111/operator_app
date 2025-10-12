@@ -7,6 +7,7 @@ import { Button, InteractiveButton } from './ui/Button';
 import { Badge, StatusBadge, SkillBadge } from './ui/Badge';
 import { LoadingSpinner, FullPageLoading, CardLoading } from './ui/Loading';
 import { AnimatedCounter } from './ui/AnimatedCounter';
+import { CustomDropdown } from './ui/CustomDropdown';
 
 /**
  * Props for the OperatorDirectory component
@@ -849,87 +850,65 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             {/* Skill Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Skill</label>
-              <select
+              <CustomDropdown
                 value={selectedSkill}
-                onChange={(e) => setSelectedSkill(e.target.value as SkillTag | 'all')}
-                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.7rem center',
-                  backgroundSize: '1.2em 1.2em',
-                }}
-              >
-                <option value="all">All Skills</option>
-                {SKILL_TAGS.map(skill => (
-                  <option key={skill} value={skill}>{skill}</option>
-                ))}
-              </select>
+                onChange={(value) => setSelectedSkill(value as SkillTag | 'all')}
+                options={[
+                  { value: 'all', label: 'All Skills' },
+                  ...SKILL_TAGS.map(skill => ({ value: skill, label: skill }))
+                ]}
+                placeholder="Select skill..."
+              />
             </div>
 
             {/* Completion Rate Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Completion Rate</label>
-              <select
+              <CustomDropdown
                 value={completionRateFilter}
-                onChange={(e) => setCompletionRateFilter(e.target.value as 'all' | '90+' | '80+' | '70+')}
-                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.7rem center',
-                  backgroundSize: '1.2em 1.2em',
-                }}
-              >
-                <option value="all">All Rates</option>
-                <option value="90+">90%+ completion</option>
-                <option value="80+">80%+ completion</option>
-                <option value="70+">70%+ completion</option>
-              </select>
+                onChange={(value) => setCompletionRateFilter(value as 'all' | '90+' | '80+' | '70+')}
+                options={[
+                  { value: 'all', label: 'All Rates' },
+                  { value: '90+', label: '90%+ completion' },
+                  { value: '80+', label: '80%+ completion' },
+                  { value: '70+', label: '70%+ completion' }
+                ]}
+                placeholder="Select rate..."
+              />
             </div>
 
             {/* XP Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Experience</label>
-              <select
+              <CustomDropdown
                 value={xpFilter}
-                onChange={(e) => setXpFilter(e.target.value as 'all' | '5000+' | '3000+' | '1000+')}
-                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.7rem center',
-                  backgroundSize: '1.2em 1.2em',
-                }}
-              >
-                <option value="all">All XP</option>
-                <option value="5000+">5000+ XP</option>
-                <option value="3000+">3000+ XP</option>
-                <option value="1000+">1000+ XP</option>
-              </select>
+                onChange={(value) => setXpFilter(value as 'all' | '5000+' | '3000+' | '1000+')}
+                options={[
+                  { value: 'all', label: 'All XP' },
+                  { value: '5000+', label: '5000+ XP' },
+                  { value: '3000+', label: '3000+ XP' },
+                  { value: '1000+', label: '1000+ XP' }
+                ]}
+                placeholder="Select XP..."
+              />
             </div>
 
             {/* Sort */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Sort</label>
-              <select
+              <CustomDropdown
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'newest' | 'alphabetical' | 'xp' | 'completion' | 'machines' | 'active')}
-                className="w-full px-3 py-2 pr-10 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.7rem center',
-                  backgroundSize: '1.2em 1.2em',
-                }}
-              >
-                <option value="newest">Newest First</option>
-                <option value="alphabetical">Alphabetical</option>
-                <option value="xp">Highest XP</option>
-                <option value="completion">Highest Completion</option>
-                <option value="machines">Most Machines</option>
-                <option value="active">Most Active Ops</option>
-              </select>
+                onChange={(value) => setSortBy(value as 'newest' | 'alphabetical' | 'xp' | 'completion' | 'machines' | 'active')}
+                options={[
+                  { value: 'newest', label: 'Newest First' },
+                  { value: 'alphabetical', label: 'Alphabetical' },
+                  { value: 'xp', label: 'Highest XP' },
+                  { value: 'completion', label: 'Highest Completion' },
+                  { value: 'machines', label: 'Most Machines' },
+                  { value: 'active', label: 'Most Active Ops' }
+                ]}
+                placeholder="Select sort..."
+              />
             </div>
           </div>
         </div>
@@ -945,21 +924,18 @@ export default function OperatorDirectory({ onBack }: OperatorDirectoryProps) {
             {filteredOperators.length > 10 && (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-[var(--muted-foreground)]">Show</span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                  className="px-2 py-1 pr-8 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm appearance-none cursor-pointer hover:bg-[var(--muted)] transition-colors"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundSize: '1em 1em',
-                  }}
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="100">100</option>
-                </select>
+                <div className="w-20">
+                  <CustomDropdown
+                    value={itemsPerPage.toString()}
+                    onChange={(value) => setItemsPerPage(Number(value))}
+                    options={[
+                      { value: '10', label: '10' },
+                      { value: '25', label: '25' },
+                      { value: '100', label: '100' }
+                    ]}
+                    className="text-sm"
+                  />
+                </div>
                 <span className="text-[var(--muted-foreground)]">per page</span>
               </div>
             )}

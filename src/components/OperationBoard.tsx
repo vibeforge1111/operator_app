@@ -36,6 +36,8 @@ import { subscribeToOperations, RealtimeManager } from '../lib/firebase/realtime
 import { OperatorProfile } from '../types/operator';
 import { useXPSystem } from '../hooks/useXPSystem';
 import { useOperatorProfile } from '../hooks/useOperatorProfile';
+import { CustomDropdown } from './ui/CustomDropdown';
+import logo from '../assets/logo.png';
 
 /**
  * Props for the OperationBoard component
@@ -367,11 +369,13 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen terminal-bg flex items-center justify-center">
-        <div className="operator-card rounded-lg p-8 text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-white">Loading Operation Board...</div>
-          <div className="text-sm text-[var(--color-text-muted)]">Fetching available missions</div>
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 animate-spin mx-auto">
+            <img src={logo} alt="Loading" className="w-full h-full object-contain" />
+          </div>
+          <div className="text-[var(--foreground)]">Loading Operation Board...</div>
+          <div className="text-sm text-[var(--muted-foreground)]">Fetching available missions</div>
         </div>
       </div>
     );
@@ -436,61 +440,65 @@ export default function OperationBoard({ profile, onBack, onCompleteOperation }:
             {/* Category Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Category</label>
-              <select
+              <CustomDropdown
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as OperationCategory | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              >
-                <option value="all">All Categories</option>
-                {OPERATION_CATEGORIES.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+                onChange={(value) => setSelectedCategory(value as OperationCategory | 'all')}
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...OPERATION_CATEGORIES.map(category => ({ value: category, label: category }))
+                ]}
+                placeholder="Select category..."
+              />
             </div>
 
             {/* Priority Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Priority</label>
-              <select
+              <CustomDropdown
                 value={selectedPriority}
-                onChange={(e) => setSelectedPriority(e.target.value as OperationPriority | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              >
-                <option value="all">All Priorities</option>
-                {OPERATION_PRIORITIES.map(priority => (
-                  <option key={priority} value={priority}>{priority}</option>
-                ))}
-              </select>
+                onChange={(value) => setSelectedPriority(value as OperationPriority | 'all')}
+                options={[
+                  { value: 'all', label: 'All Priorities' },
+                  ...OPERATION_PRIORITIES.map(priority => ({ value: priority, label: priority }))
+                ]}
+                placeholder="Select priority..."
+              />
             </div>
 
             {/* Status Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Status</label>
-              <select
+              <CustomDropdown
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as OperationStatus | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              >
-                <option value="all">All Statuses</option>
-                {OPERATION_STATUSES.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
+                onChange={(value) => setSelectedStatus(value as OperationStatus | 'all')}
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  ...OPERATION_STATUSES.map(status => ({ value: status, label: status }))
+                ]}
+                placeholder="Select status..."
+              />
             </div>
 
             {/* Recommended Toggle */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Filter</label>
-              <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
-                <input
-                  type="checkbox"
-                  id="recommended"
-                  checked={showRecommended}
-                  onChange={(e) => setShowRecommended(e.target.checked)}
-                  className="w-4 h-4 text-[var(--foreground)] bg-[var(--background)] border border-[var(--border)] rounded focus:ring-[var(--foreground)]"
-                />
-                <span className="text-[var(--foreground)] text-sm">Recommended</span>
-              </label>
+              <div className="flex items-center space-x-2 px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
+                <label className="custom-checkbox cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showRecommended}
+                    onChange={(e) => setShowRecommended(e.target.checked)}
+                  />
+                  <span className="checkbox-mark"></span>
+                </label>
+                <label
+                  htmlFor=""
+                  onClick={() => setShowRecommended(!showRecommended)}
+                  className="text-[var(--foreground)] text-sm cursor-pointer select-none"
+                >
+                  Recommended
+                </label>
+              </div>
             </div>
           </div>
         </div>

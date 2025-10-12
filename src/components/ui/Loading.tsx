@@ -8,6 +8,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
+import logo from "../../assets/logo.png";
 
 const loadingVariants = cva(
   "animate-spin rounded-full border-2 border-current border-t-transparent",
@@ -140,31 +141,29 @@ const FullPageLoading = React.forwardRef<HTMLDivElement, FullPageLoadingProps>(
     return (
       <div
         ref={ref}
-        className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center"
+        className="min-h-screen bg-[var(--background)] flex items-center justify-center"
       >
         <div className="text-center space-y-4 max-w-md px-6">
           <div className="flex justify-center">
-            {variant === 'spinner' ? (
-              <LoadingSpinner size={size === 'lg' ? 'xl' : 'lg'} />
-            ) : (
-              <DotsLoader size={size === 'lg' ? 'lg' : 'default'} />
-            )}
+            <div className="w-16 h-16 animate-spin">
+              <img src={logo} alt="Loading" className="w-full h-full object-contain" />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-[var(--color-primary)]">
+            <h2 className="text-xl font-bold text-[var(--foreground)]">
               {title}
             </h2>
             {description && (
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="text-sm text-[var(--muted-foreground)]">
                 {description}
               </p>
             )}
           </div>
 
-          <div className="text-xs text-[var(--color-text-muted)] space-y-1">
+          <div className="text-xs text-[var(--muted-foreground)] space-y-1">
             <div>tick... tick... tick...</div>
-            <div className="text-[var(--color-primary)]">Network heartbeat active</div>
+            <div className="text-[var(--foreground)]">Network heartbeat active</div>
           </div>
         </div>
       </div>

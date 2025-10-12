@@ -3,6 +3,8 @@ import { Machine, MachineCategory } from '../types/machine';
 import { getMachines, connectOperatorToMachine } from '../lib/firebase/machines';
 import { getOperators } from '../lib/firebase/operators';
 import { subscribeToMachines, subscribeToOperators, RealtimeManager } from '../lib/firebase/realtime';
+import { CustomDropdown } from './ui/CustomDropdown';
+import logo from '../assets/logo.png';
 
 /**
  * Props for the MachineMarketplace component
@@ -200,11 +202,13 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen terminal-bg flex items-center justify-center">
-        <div className="operator-card rounded-lg p-8 text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-white">Loading Machine Marketplace...</div>
-          <div className="text-sm text-[var(--color-text-muted)]">Fetching available machines</div>
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 animate-spin mx-auto">
+            <img src={logo} alt="Loading" className="w-full h-full object-contain" />
+          </div>
+          <div className="text-[var(--foreground)]">Loading Machine Marketplace...</div>
+          <div className="text-sm text-[var(--muted-foreground)]">Fetching available machines</div>
         </div>
       </div>
     );
@@ -258,44 +262,52 @@ export default function MachineMarketplace({ onBack, onConnectToMachine }: Machi
             {/* Category Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Category</label>
-              <select
+              <CustomDropdown
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as MachineCategory | 'all')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              >
-                <option value="all">All Categories</option>
-                {MACHINE_CATEGORIES.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+                onChange={(value) => setSelectedCategory(value as MachineCategory | 'all')}
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...MACHINE_CATEGORIES.map(category => ({ value: category, label: category }))
+                ]}
+                placeholder="Select category..."
+              />
             </div>
 
             {/* Status Filter */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Status</label>
-              <select
+              <CustomDropdown
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as 'all' | 'Active' | 'Development')}
-                className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] focus:border-[var(--foreground)]/50 focus:outline-none text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Development">Development</option>
-              </select>
+                onChange={(value) => setSelectedStatus(value as 'all' | 'Active' | 'Development')}
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'Active', label: 'Active' },
+                  { value: 'Development', label: 'Development' }
+                ]}
+                placeholder="Select status..."
+              />
             </div>
 
             {/* Available Only */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium text-[var(--muted-foreground)]">Filter</label>
-              <label className="flex items-center space-x-2 cursor-pointer px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
-                <input
-                  type="checkbox"
-                  checked={showAvailableOnly}
-                  onChange={(e) => setShowAvailableOnly(e.target.checked)}
-                  className="w-4 h-4 text-[var(--foreground)] bg-[var(--background)] border border-[var(--border)] rounded focus:ring-[var(--foreground)]"
-                />
-                <span className="text-[var(--foreground)] text-sm">Available only</span>
-              </label>
+              <div className="flex items-center space-x-2 px-3 py-2 bg-[var(--background)] border border-[var(--border)] rounded">
+                <label className="custom-checkbox cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showAvailableOnly}
+                    onChange={(e) => setShowAvailableOnly(e.target.checked)}
+                  />
+                  <span className="checkbox-mark"></span>
+                </label>
+                <label
+                  htmlFor=""
+                  onClick={() => setShowAvailableOnly(!showAvailableOnly)}
+                  className="text-[var(--foreground)] text-sm cursor-pointer select-none"
+                >
+                  Available only
+                </label>
+              </div>
             </div>
           </div>
         </div>
